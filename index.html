@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pixel Rewind Player</title>
+<meta name="description" content="A player for N-Gage-era games on Android and Linux. It ships no game of its own: you bring the one you want to play, and it runs the original engine rather than a remake.">
+<meta name="theme-color" content="#0b1322">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="Pixel Rewind Player">
+<meta property="og:description" content="A player for N-Gage-era games on Android and Linux. Bring your own game; it runs the original engine.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar__in">
+    <a class="brand" href="index.html">
+      <img src="assets/img/favicon.svg" alt="" width="26" height="26">
+      Pixel Rewind
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="#games">Games</a>
+      <a href="terms.html">Terms</a>
+      <a href="privacy.html">Privacy</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <section class="hero">
+    <div class="wrap">
+      <img class="hero__logo" src="assets/img/logo.png" alt="Pixel Rewind" width="462" height="300">
+      <p class="lede">A player for N-Gage-era games. It ships no game of its own &mdash; you bring the one you want to play, and it runs the original engine rather than a remake of it.</p>
+      <div class="btn-row">
+        <button class="btn btn--primary" type="button" id="get" aria-disabled="true">
+          Get the app <span class="chip">Soon</span>
+        </button>
+        <button class="btn" type="button" id="register" aria-disabled="true">
+          Register <span class="chip">Soon</span>
+        </button>
+      </div>
+      <p class="note" id="note" hidden role="status"></p>
+      <p class="platforms">Android &middot; Linux</p>
+    </div>
+  </section>
+
+  <section id="bring">
+    <div class="wrap split">
+      <div>
+        <p class="label">Bring your own game</p>
+        <h2>The app is the player, not the game</h2>
+        <p>Pixel Rewind ships no game content at all. On first start it asks where your game is &mdash; a free open-source one, or a copy you already own &mdash; and copies what it needs into its own storage. After that it starts straight into the game.</p>
+        <p>It takes an N-Gage <code>.n-gage</code> file, or the folder holding a PC port's executable and its data files. Nothing you import is uploaded anywhere; it stays on the device.</p>
+      </div>
+      <div class="screen">
+        <img src="assets/img/shot-choose.png" alt="The app's first screen, asking where your game is, with options for an .n-gage file or a PC port folder." width="540" height="1072" loading="lazy">
+      </div>
+    </div>
+  </section>
+
+  <section id="games">
+    <div class="wrap">
+      <p class="label">Start here</p>
+      <h2>Three free games, made for it</h2>
+      <p class="narrow">If you don't have a game to bring, these are built to run on Pixel Rewind and cost nothing. Each is open source, with artwork that is free to use.</p>
+
+      <div class="games">
+        <article class="game">
+          <img src="assets/img/shot-cloudhop.png" alt="Cloud Hop title screen: a pixel-art penguin over a bright sky." width="540" height="1108" loading="lazy">
+          <div class="game__body">
+            <h3>Cloud Hop</h3>
+            <p>A tap-to-fly game in landscape, played with the screen itself.</p>
+            <p class="game__credit">Art by Kenney (CC0)</p>
+          </div>
+        </article>
+
+        <article class="game">
+          <img src="assets/img/shot-starfall.png" alt="Starfall title screen: a pixel-art fighter over a starfield, with the on-screen D-pad below." width="540" height="1108" loading="lazy">
+          <div class="game__body">
+            <h3>Starfall</h3>
+            <p>A top-down space shooter in portrait, built around the D-pad and buttons.</p>
+            <p class="game__credit">Art by Kenney (CC0)</p>
+          </div>
+        </article>
+
+        <article class="game">
+          <img src="assets/img/shot-relicrush.png" alt="Relic Rush in play: two heroes racing across a tiled dungeon board." width="540" height="1108" loading="lazy">
+          <div class="game__body">
+            <h3>Relic Rush</h3>
+            <p>Place a block, then walk the path you made. Steal the relic and run home.</p>
+            <p class="game__credit">Art from Super Retro World by Gif, Noiracide and Romi</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="engine">
+    <div class="wrap narrow">
+      <p class="label">How it works</p>
+      <h2>The original engine, emulated</h2>
+      <p>Pixel Rewind does not rewrite or reimplement the games it plays. It runs their original compiled engine inside a CPU emulator and supplies the handful of operating-system calls that engine expects. Every frame, every sound and every rule comes from the original binary, so behaviour matches the original rather than approximating it.</p>
+      <ul class="facts">
+        <li><b>Two engines</b><span>A 32-bit x86 PC build, or the ARM N-Gage build for Symbian OS 9. One app runs both and works out which one it has from the files you give it.</span></li>
+        <li><b>No Wine, no Java, no Symbian</b><span>Nothing else needs installing. The emulator and the runtime it stands in for are part of the app.</span></li>
+        <li><b>Original output</b><span>240&times;320 graphics and 8&nbsp;kHz mono sound, exactly as the games produced them.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="fits">
+    <div class="wrap split split--flip">
+      <div>
+        <p class="label">On your device</p>
+        <h2>Made to fit a phone that isn't from 2008</h2>
+        <p>These games were drawn for a small portrait screen and a numeric keypad. Pixel Rewind lays them out for the screen you actually have, and gives you controls that suit it.</p>
+        <ul class="facts">
+          <li><b>Landscape</b><span>Play filling a widescreen display, or keep the original portrait shape.</span></li>
+          <li><b>Controls</b><span>An on-screen D-pad and buttons, direct touch on the game, or a connected gamepad.</span></li>
+          <li><b>Eight languages</b><span>The app and the game are kept saying the same one, in both directions.</span></li>
+        </ul>
+      </div>
+      <div class="screen">
+        <img src="assets/img/shot-setup.png" alt="The app's setup screen, offering screen orientation, landscape size and on-screen control options." width="540" height="1072" loading="lazy">
+      </div>
+    </div>
+  </section>
+
+  <section id="online">
+    <div class="wrap narrow">
+      <p class="label">Online</p>
+      <h2>Games that had a server can have one again</h2>
+      <p>Some of these games shipped with online play against servers that were switched off years ago. Where that is the case, Pixel Rewind can connect to a community-run replacement instead, so the original online modes work again.</p>
+      <p>Online play is optional. Nothing about it is required to play on your own, and accounts are not open yet.</p>
+      <div class="btn-row">
+        <button class="btn" type="button" id="register2" aria-disabled="true">
+          Register <span class="chip">Soon</span>
+        </button>
+      </div>
+      <p class="note" id="note2" hidden role="status"></p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer__in">
+      <p>Pixel Rewind Player &mdash; a player for N-Gage-era games on Android and Linux.<br>
+         You bring the games; the app brings nothing but the machinery to run them.</p>
+      <nav class="footer__links" aria-label="Footer">
+        <a href="index.html">Home</a>
+        <a href="terms.html">Terms</a>
+        <a href="privacy.html">Privacy</a>
+      </nav>
+    </div>
+    <p class="disclaimer">
+      Pixel Rewind Player is an independent project and is not affiliated with, endorsed by or connected to Nokia, RedLynx, or any publisher of any game it can play. N-Gage and all game titles and trademarks belong to their respective owners. Screenshots on this page show the app running freely redistributable sample games.
+    </p>
+  </div>
+</footer>
+
+<script src="assets/js/main.js"></script>
+</body>
+</html>

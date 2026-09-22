@@ -1,0 +1,410 @@
+/* Pixel Rewind Player - site styles.
+   Blocky on purpose: no rounded corners, no blurred shadows, integer offsets. */
+
+:root {
+  --bg:         #0b1322;
+  --bg-2:       #0e1a2c;
+  --panel:      #14223a;
+  --panel-2:    #1a2c49;
+  --line:       #27405f;
+  --line-soft:  #1c2f4c;
+  --cyan:       #5bc8e8;
+  --cyan-bright:#9fe8fb;
+  --cyan-dim:   #3f8aa8;
+  --amber:      #f6a44c;
+  --pink:       #f2688a;
+  --text:       #dfe8f5;
+  --muted:      #8ea6c4;
+  --shadow:     #050c16;
+
+  --display: "Silkscreen", "Courier New", monospace;
+  --body: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  --gutter: 20px;
+  --measure: 1080px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 17px;
+  line-height: 1.65;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Scanlines. Faint enough to read as texture, not as a gimmick. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.022) 0 1px,
+    transparent 1px 3px
+  );
+}
+
+/* height:auto is load-bearing: the width/height attributes on each <img> are presentational
+   hints, so without it any CSS width leaves the attribute height applied and squashes the
+   picture. Keep it whenever an image is sized by CSS. */
+img { max-width: 100%; display: block; height: auto; }
+
+a { color: var(--cyan); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+a:hover { color: var(--cyan-bright); }
+
+:focus-visible { outline: 2px solid var(--cyan-bright); outline-offset: 3px; }
+
+.wrap {
+  width: 100%;
+  max-width: var(--measure);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.narrow { max-width: 760px; }
+
+/* ---------------------------------------------------------------- type */
+
+h1, h2, h3 {
+  font-family: var(--display);
+  font-weight: 400;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  margin: 0 0 0.6em;
+}
+
+h2 { font-size: clamp(19px, 2.6vw, 25px); }
+h3 { font-size: 15px; color: var(--cyan); }
+
+p { margin: 0 0 1.1em; }
+p:last-child { margin-bottom: 0; }
+
+.lede { font-size: clamp(18px, 2.1vw, 21px); color: #c9d8ec; }
+.muted { color: var(--muted); }
+.small { font-size: 14px; line-height: 1.6; }
+
+/* A section label: cyan block, then the word. */
+.label {
+  font-family: var(--display);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.label::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  background: var(--cyan);
+  flex: none;
+}
+
+/* ---------------------------------------------------------------- chrome */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 80;
+  background: rgba(11, 19, 34, 0.94);
+  border-bottom: 2px solid var(--line-soft);
+  backdrop-filter: blur(6px);
+}
+
+.topbar__in {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 58px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--display);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: var(--text);
+  text-decoration: none;
+}
+.brand:hover { color: var(--cyan-bright); }
+.brand img { width: 26px; height: 26px; image-rendering: pixelated; }
+
+.nav {
+  display: flex;
+  gap: 18px;
+  font-family: var(--display);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.nav a { color: var(--muted); text-decoration: none; }
+.nav a:hover, .nav a[aria-current="page"] { color: var(--cyan); }
+
+/* ---------------------------------------------------------------- buttons */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--display);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--text);
+  background: var(--panel-2);
+  border: 2px solid var(--line);
+  padding: 14px 18px;
+  box-shadow: 4px 4px 0 var(--shadow);
+  cursor: pointer;
+  transition: transform 0.06s steps(2), box-shadow 0.06s steps(2);
+}
+.btn:hover { border-color: var(--cyan-dim); color: var(--text); }
+.btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--shadow);
+}
+
+.btn--primary {
+  background: var(--cyan);
+  color: #05121c;
+  border-color: var(--cyan-bright);
+}
+.btn--primary:hover { background: var(--cyan-bright); color: #05121c; }
+
+.btn[aria-disabled="true"] { cursor: default; }
+.btn[aria-disabled="true"]:hover { border-color: var(--line); }
+.btn--primary[aria-disabled="true"] { opacity: 0.92; }
+.btn--primary[aria-disabled="true"]:hover { background: var(--cyan); }
+
+/* The "soon" chip that rides inside a button. */
+.chip {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  padding: 3px 6px;
+  border: 1px solid currentColor;
+  opacity: 0.85;
+}
+
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+}
+
+.note {
+  font-family: var(--display);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--amber);
+  margin-top: 14px;
+  min-height: 1em;
+}
+.note[hidden] { display: none; }
+
+/* ---------------------------------------------------------------- hero */
+
+.hero {
+  border-bottom: 2px solid var(--line-soft);
+  background:
+    radial-gradient(120% 90% at 50% 0%, #16294a 0%, var(--bg) 62%);
+  text-align: center;
+  padding: clamp(40px, 7vw, 76px) 0 clamp(36px, 6vw, 64px);
+}
+
+.hero__logo {
+  width: min(430px, 82vw);
+  margin: 0 auto clamp(20px, 3vw, 30px);
+  image-rendering: pixelated;
+}
+
+.hero .lede { max-width: 620px; margin-inline: auto; }
+
+.hero .btn-row { justify-content: center; margin-top: 28px; }
+
+.platforms {
+  font-family: var(--display);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 26px;
+}
+
+/* ---------------------------------------------------------------- sections */
+
+section { padding: clamp(44px, 6vw, 76px) 0; }
+section + section { border-top: 2px solid var(--line-soft); }
+
+.split {
+  display: grid;
+  gap: clamp(28px, 4vw, 52px);
+  grid-template-columns: 1fr;
+  align-items: center;
+}
+
+@media (min-width: 860px) {
+  .split { grid-template-columns: 1.15fr 0.85fr; }
+  .split--flip > :first-child { order: 2; }
+}
+
+/* A screenshot in a chunky frame. */
+.screen {
+  border: 2px solid var(--line);
+  background: var(--bg-2);
+  box-shadow: 6px 6px 0 var(--shadow);
+  padding: 8px;
+  max-width: 244px;
+  margin-inline: auto;
+}
+.screen img { width: 100%; }
+
+.facts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+  border: 2px solid var(--line-soft);
+  background: var(--line-soft);
+}
+.facts li {
+  background: var(--bg-2);
+  padding: 14px 16px;
+  display: grid;
+  gap: 4px;
+}
+.facts b {
+  font-family: var(--display);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  font-weight: 400;
+}
+.facts span { font-size: 15px; color: #c6d6ea; line-height: 1.55; }
+
+/* ---------------------------------------------------------------- games */
+
+.games {
+  display: grid;
+  gap: 22px;
+  grid-template-columns: 1fr;
+  margin-top: 32px;
+}
+@media (min-width: 680px) { .games { grid-template-columns: repeat(3, 1fr); } }
+
+.game {
+  border: 2px solid var(--line);
+  background: var(--bg-2);
+  box-shadow: 5px 5px 0 var(--shadow);
+  display: flex;
+  flex-direction: column;
+}
+.game img { width: 100%; border-bottom: 2px solid var(--line); }
+.game__body { padding: 16px; display: grid; gap: 6px; }
+.game__body h3 { margin: 0; }
+.game__body p { font-size: 15px; color: #c6d6ea; }
+.game__credit {
+  font-size: 12.5px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* ---------------------------------------------------------------- prose (legal) */
+
+.prose h2 { margin-top: 2em; }
+.prose h3 { margin-top: 1.9em; margin-bottom: 0.8em; font-size: 14px; letter-spacing: 0.06em; text-transform: uppercase; }
+.prose h2:first-of-type { margin-top: 1em; }
+.prose ul { padding-left: 1.2em; margin: 0 0 1.1em; }
+.prose li { margin-bottom: 0.5em; }
+.prose strong { color: #eef4fc; }
+
+.pagehead {
+  border-bottom: 2px solid var(--line-soft);
+  padding: clamp(34px, 5vw, 56px) 0 clamp(26px, 4vw, 40px);
+  background: linear-gradient(180deg, #13223c 0%, var(--bg) 100%);
+}
+.pagehead h1 { font-size: clamp(22px, 3.4vw, 32px); margin-bottom: 10px; }
+.updated {
+  font-family: var(--display);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.callout {
+  border: 2px solid var(--line);
+  border-left: 6px solid var(--cyan);
+  background: var(--bg-2);
+  padding: 18px 20px;
+  margin: 1.6em 0;
+}
+.callout p { font-size: 16px; }
+
+/* ---------------------------------------------------------------- footer */
+
+.footer {
+  border-top: 2px solid var(--line-soft);
+  padding: 42px 0 54px;
+  background: var(--bg-2);
+}
+.footer__in {
+  display: grid;
+  gap: 26px;
+}
+@media (min-width: 760px) {
+  .footer__in { grid-template-columns: 1fr auto; align-items: start; }
+}
+.footer p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+.footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-family: var(--display);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.footer__links a { color: var(--muted); text-decoration: none; }
+.footer__links a:hover { color: var(--cyan); }
+
+.disclaimer {
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 2px solid var(--line-soft);
+  font-size: 13px;
+  color: var(--muted);
+  max-width: 760px;
+}
+
+/* Narrow phones: the top bar is the only row tight enough to overflow. */
+@media (max-width: 430px) {
+  :root { --gutter: 14px; }
+  body { font-size: 16px; }
+  .brand { font-size: 11px; gap: 8px; }
+  .brand img { width: 22px; height: 22px; }
+  .nav { gap: 12px; font-size: 11px; }
+  .btn { padding: 13px 15px; font-size: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .btn { transition: none; }
+}
