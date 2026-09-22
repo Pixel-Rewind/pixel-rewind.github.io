@@ -7,6 +7,7 @@ GitHub Pages. No build step, no framework, no dependencies.
 index.html          home
 terms.html          terms of use
 privacy.html        privacy policy
+account.html        where the app's "Create an account" button lands (noindex)
 assets/css/         one stylesheet
 assets/js/          one small script (the two "soon" buttons)
 assets/img/         logo, favicon, screenshots used on the page
@@ -49,6 +50,21 @@ checked:
 The section deliberately states the **limits** as prominently as the permissions. It is not
 legal advice and says so; a Dutch IT lawyer should review it before the store submission if
 the project ever takes money.
+
+## URLs the Android app depends on
+
+The app ships three strings in `native-port/port/i18n/strings.json` that point here. Once a
+release is out they are effectively frozen, so treat these paths as a contract:
+
+| App string | Points at | Why |
+|---|---|---|
+| `site_host` | `pixel-rewind.github.io` | Shown as text: "Creating an account opens %s in your browser." |
+| `site_account_url` | `/account.html` | The **Create an account** button in onboarding. A dedicated page means what it says can change without an app update. |
+| `site_games_url` | `/#games` | The "Where to find games" link, in onboarding and the setup screen. Depends on `<section id="games">` in `index.html` — keep that id. |
+
+`account.html` is `noindex` and is not in the site navigation: it exists to answer someone
+who just pressed a button in the app. Renaming or removing any of these breaks installed
+copies of the app, which cannot be fixed from this repository.
 
 ## Local preview
 
