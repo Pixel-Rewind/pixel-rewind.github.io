@@ -16,9 +16,19 @@ screenshots/        the original phone captures the page images were cut from
 
 ## Before this goes live
 
-**Contact addresses.** `privacy@pixelrewind.app` and `hello@pixelrewind.app` are assumed
-from the intended domain and marked `TODO` in the HTML. Confirm they deliver before
-submitting to Google Play — the review checks that a contact route works.
+**The repository has to be renamed.** The pages declare their canonical URLs as
+`https://pixel-rewind.github.io/…`, which is the address of an *organisation* Pages site.
+GitHub only serves that from a repository named after the organisation. This repository is
+currently `Pixel-Rewind/player`, which publishes to `https://pixel-rewind.github.io/player/`
+instead.
+
+Rename it to **`pixel-rewind.github.io`** (Settings → General → Repository name) and the
+stated URLs become correct. If you would rather keep the name `player`, say so — the
+`<link rel="canonical">` tags and the `og:` URLs in all three pages need the `/player/`
+prefix added, and the Play Console privacy-policy URL has to match exactly or review fails.
+
+Everything else is done. Contact is `support@jubinganga.com` on both legal pages, and the
+governing law is the Netherlands.
 
 ## The legal section in terms.html
 
@@ -49,9 +59,12 @@ python3 -m http.server 8000
 
 ## Deploying
 
-Push to the default branch and enable GitHub Pages for it (Settings → Pages → Deploy from
-a branch → root). For a custom domain, add a `CNAME` file containing the bare hostname and
-point the DNS at GitHub Pages.
+Published at **https://pixel-rewind.github.io/** (see the rename note above). Push to the
+default branch and enable GitHub Pages for it: Settings → Pages → Deploy from a branch →
+`main` / root. `.nojekyll` keeps the files served as written.
+
+The canonical and Open Graph URLs are absolute and hard-coded in the three HTML files; if
+the address ever changes, grep for `pixel-rewind.github.io` and update all of them together.
 
 ## Images
 
