@@ -97,6 +97,18 @@ on the site.
 ## A note on the copy
 
 The site deliberately describes Pixel Rewind as a *player* that ships no game, and points
-at the free sample games rather than any commercial title. The privacy policy's claims —
-one Android permission, zero third-party SDKs, no analytics — are true of the app as built
-and should be re-checked if that ever changes.
+at the free sample games rather than any commercial title. The privacy policy's claims were
+checked against the app's code on 28 September 2026 and must be re-checked whenever any of
+these change:
+
+- **Sentry** (Android `AndroidManifest.xml` + `Diagnostics.java`, iOS `AppDelegate.swift` +
+  `Diagnostics.swift`): EU region, always on, crashes and error reports with the core's log
+  tail, breadcrumbs, view hierarchy, performance traces. **Screenshots are off** — the policy
+  says so.
+- **Permissions**: five on Android (`INTERNET`, two foreground-service, `WAKE_LOCK`,
+  `POST_NOTIFICATIONS`); local network and add-to-Photos on iOS.
+- **Online**: guests only while `ACCOUNTS_CLOSED=1`; rooms by code; chat relayed; the
+  legacy protocol is unencrypted; server logs are size-capped (`docker-compose.yml`
+  `logging`) and lost on redeploy.
+
+The Play Console Data safety form and the App Store privacy labels must say the same.

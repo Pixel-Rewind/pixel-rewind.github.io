@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Privacy Policy &mdash; Pixel Rewind Player</title>
-<meta name="description" content="Privacy policy for the Pixel Rewind Player app: what it stores, what it sends, and what it does not collect.">
+<meta name="description" content="Privacy policy for the Pixel Rewind Player app: what it stores, what it sends for crash reporting and online play, and what it does not collect.">
 <meta name="theme-color" content="#0b1322">
 <link rel="canonical" href="https://pixel-rewind.github.io/privacy.html">
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
@@ -34,77 +34,124 @@
   <div class="pagehead">
     <div class="wrap narrow">
       <h1>Privacy Policy</h1>
-      <p class="updated">Last updated: 22 September 2026</p>
+      <p class="updated">Last updated: 28 September 2026</p>
     </div>
   </div>
 
   <section>
     <div class="wrap narrow prose">
 
-      <p class="lede">Pixel Rewind Player does not collect, profile or sell anything about you. This page sets out exactly what the app stores, what leaves your device, and what it never touches.</p>
+      <p class="lede">Pixel Rewind Player collects as little as it can. This page sets out exactly what the app stores, what leaves your device and why, who receives it, and what it never touches.</p>
 
       <div class="callout">
-        <p><strong>The short version.</strong> The app has no analytics, no advertising, no crash reporting and no third-party SDKs of any kind. It requests one Android permission, <code>INTERNET</code>, and uses it only if you choose to play online. Games you import and settings you change stay on your device.</p>
+        <p><strong>The short version.</strong> The app has no advertising, no advertising identifiers and no usage analytics, and we never sell your data or share it for marketing. It does send <strong>crash and error reports</strong> to Sentry, a diagnostics service, so we can fix what breaks. If you play online, the game server sees a <strong>random guest name</strong>, your IP address, your moves and any <strong>chat messages</strong> you send. Games you import stay on your device.</p>
       </div>
 
       <h2>Who this applies to</h2>
-      <p>This policy covers the Pixel Rewind Player application for Android and Linux (&ldquo;the app&rdquo;) and this website. In this policy, &ldquo;we&rdquo; means the developer of Pixel Rewind Player.</p>
+      <p>This policy covers the Pixel Rewind Player application for Android, iOS and Linux (&ldquo;the app&rdquo;), the online game server we run for it, and this website. In this policy, &ldquo;we&rdquo; means the developer of Pixel Rewind Player, who is the controller of the personal data described here. Contact details are at the end of this page.</p>
 
       <h2>What the app stores on your device</h2>
-      <p>All of the following is held in the app's own private storage on your device. None of it is transmitted to us, and we have no ability to read it.</p>
+      <p>The following is held in the app's own private storage on your device. We cannot read it, and it is only transmitted as described in the sections below.</p>
       <ul>
         <li><strong>Game files you import.</strong> When you point the app at a game, it copies the files it needs into its own storage so it can run them. These files are never uploaded.</li>
-        <li><strong>Your settings.</strong> Screen orientation, layout size, control choices, language, and the other options on the settings screen.</li>
+        <li><strong>Your settings.</strong> Screen orientation, layout size, control choices, language, sound and the other options on the settings screen.</li>
         <li><strong>Game saves and progress.</strong> Whatever the game itself writes, kept where that game expects it.</li>
-        <li><strong>Online sign-in details, if you use online play.</strong> A user name and password for the game server, stored on the device so you do not have to type them each time.</li>
+        <li><strong>Your online identity.</strong> The guest identity the app uses to play online.</li>
       </ul>
+      <p>On Android, the system's own backup may copy the app's storage to your Google account, if you have backup turned on. That backup is between you and Google; we have no access to it.</p>
 
-      <h2>What leaves your device</h2>
-      <p><strong>If you only play on your own, nothing does.</strong> The app makes no network connections at all unless you use an online feature of a game.</p>
-      <p>If you do play online, the app connects directly to a game server &mdash; for games whose original servers no longer exist, that is a community-run replacement. In the course of that connection:</p>
+      <h2>Crash and error reports</h2>
+      <p>When the app crashes, or when something goes wrong without crashing it &mdash; the emulated game stopping, a lost connection to the server, a screen layout that fails to build &mdash; the app sends a report to <strong>Sentry</strong>, a crash-reporting service operated by Functional Software, Inc. We use Sentry's EU data region, so reports are stored in Germany.</p>
+      <p>A report can contain:</p>
       <ul>
-        <li>The user name you chose is sent to the server, so other players can see who they are playing against.</li>
-        <li>Your password is sent to the server to sign you in.</li>
-        <li>The server necessarily sees your device's IP address, as any internet server does.</li>
-        <li>Game traffic for the match itself &mdash; moves, results and similar &mdash; passes between you and the server.</li>
+        <li><strong>Technical details of the failure:</strong> the error, a stack trace and the app's recent internal log, up to 32&nbsp;KB of text. That log can mention the guest name you are using online, the server you connected to and the game you were running.</li>
+        <li><strong>Device and app details:</strong> the app version, device model, operating system version, screen size, memory use, language setting and similar technical facts.</li>
+        <li><strong>What was running:</strong> which game type and screen layout, and whether an online match was in progress.</li>
+        <li><strong>The structure of the app's screen</strong> at the time of the failure: which of the app's buttons and panels were showing. No screenshot is taken.</li>
+        <li><strong>A trail of recent actions</strong> (&ldquo;breadcrumbs&rdquo;): which screens were opened and which buttons were pressed before the failure. Text you type is not recorded.</li>
+        <li><strong>A random installation identifier</strong> that Sentry's library creates, so repeat problems on one device can be told apart from problems on many. It is not linked to your name or to any account.</li>
+        <li><strong>Performance measurements</strong>, such as how long the app takes to start and to change screens.</li>
       </ul>
-      <p>That server is operated separately from the app, and its operator decides what it records. If you use a server you were given by someone else, its handling of your data is between you and whoever runs it.</p>
+      <p>On Android 11 and later, when the app starts, it also reads the system's record of how its previous run ended. That lets it report cases where the system closed it unexpectedly, for example for running out of memory.</p>
+      <p>Sentry's servers necessarily see your device's IP address when a report is sent. We do not use it to identify you. Reports are sent over an encrypted connection.</p>
+      <p><strong>Why:</strong> the app runs old games on a wide range of phones, tablets and TVs we will never own, and a report is often the only way to learn that something broke and why. Our legal basis is our legitimate interest in keeping the app working (Article 6(1)(f) GDPR). Sentry deletes reports automatically after at most 90 days.</p>
+      <p>There is currently no switch in the app to turn crash reporting off. If you object to it, you have the right to tell us so (see &ldquo;Your rights&rdquo;), and the app sends nothing while your device is offline.</p>
+
+      <h2>Online play</h2>
+      <p><strong>If you only play on your own, the app makes no connection to the game server.</strong> Crash reports, described above, are the only thing it may send.</p>
+      <p>When you use a game's online modes, the app connects to a game server. By default that is the server we run for the app, on a cloud server rented from DigitalOcean. For games whose original servers no longer exist, this is a community-built replacement. You can also point the app at a different server, and that server's operator then decides what it records.</p>
+
+      <h3>Guest identity</h3>
+      <p>Accounts are not open yet. Every player joins online play as a <strong>guest with a randomly generated name</strong>. You do not give us your real name, e-mail address or any other contact detail to play. Other players in your lobby, room or match see that guest name.</p>
+
+      <h3>Rooms</h3>
+      <p>Some games let you create a room and share its six-character code so friends can join. Anyone who has the code can join while the room is open, so share it only with the people you want to play with. The code, and the guest names of those in the room, pass through our server.</p>
+
+      <h3>Chat</h3>
+      <p>Where a game has chat, the messages you send are relayed through the server to the other players in your match, who can read them. Please do not put personal information in chat. Our server does not keep an archive of chat messages. Messages do pass through it, though, and while we are diagnosing a fault they can appear in its logs (see below).</p>
+
+      <h3>What the server receives and keeps</h3>
+      <ul>
+        <li>Your guest name and the internal session identifiers the server assigns.</li>
+        <li>Your IP address, which any internet server sees when you connect.</li>
+        <li>Match traffic: the moves you make, the hero you pick, the results, and the chat messages you send.</li>
+        <li>Rooms you create or join, and their codes.</li>
+      </ul>
+      <p>The server keeps an operational log of connections and matches so we can find and fix faults, such as a match that froze. When detailed logging is switched on to investigate a problem, that log can include the full content of match traffic, chat included. The log has a fixed maximum size: once it is full, the oldest entries are deleted as new ones arrive, and the whole log is erased whenever the server is updated. The server also reports its own faults to Sentry. Apart from the log, it keeps only running totals, such as the number of matches played, which contain no names or identifiers.</p>
+      <p><strong>Why:</strong> to connect you with other players and run the match, which is the service you asked for (Article 6(1)(b) GDPR). We also do it to keep the service working and free of abuse, which is our legitimate interest (Article 6(1)(f) GDPR).</p>
+      <p><strong>Please note:</strong> the online protocol these games use was designed in 2008 and does not encrypt its traffic. Your guest name, moves and chat travel between your device and the server unencrypted, as they did on the original service.</p>
 
       <h2>What the app does not do</h2>
       <ul>
-        <li>No analytics or usage tracking of any kind.</li>
-        <li>No advertising, and no advertising identifiers.</li>
-        <li>No crash or diagnostic reporting.</li>
-        <li>No third-party libraries, software development kits or services embedded in the app.</li>
-        <li>No access to your contacts, location, camera, microphone, photos, call logs or messages. The app does not request those permissions and cannot use them.</li>
-        <li>No selling or sharing of personal information, because none is collected.</li>
+        <li>No advertising and no advertising identifiers.</li>
+        <li>No usage analytics or behavioural profiling. Crash reports exist only to fix faults.</li>
+        <li>No selling of personal data, and no sharing of it with anyone for marketing.</li>
+        <li>No screenshots of your screen.</li>
+        <li>No access to your contacts, location, camera, microphone, call logs or messages. The app does not request those permissions and cannot use them.</li>
+        <li>No upload of the games you import.</li>
       </ul>
 
-      <h2>Android permissions</h2>
-      <p>The app declares exactly one permission:</p>
+      <h2>Permissions</h2>
+      <h3>Android</h3>
       <ul>
-        <li><code>android.permission.INTERNET</code> &mdash; used solely to reach a game server when you play online.</li>
+        <li><code>INTERNET</code> &mdash; to reach the game server when you play online, and to send crash reports.</li>
+        <li><code>FOREGROUND_SERVICE</code>, <code>FOREGROUND_SERVICE_SPECIAL_USE</code> and <code>WAKE_LOCK</code> &mdash; to keep an online match, or an open-source game, running while you briefly switch to another app, so that the other players' match does not stall.</li>
+        <li><code>POST_NOTIFICATIONS</code> &mdash; to show the notification Android requires while a game keeps running in the background.</li>
       </ul>
-      <p>Choosing a game to import uses the Android system file picker, which grants the app access only to the file or folder you pick, at the moment you pick it.</p>
+      <h3>iOS</h3>
+      <ul>
+        <li><strong>Local network</strong> &mdash; asked for only if you set a game server on your own local network.</li>
+        <li><strong>Add to Photos</strong> &mdash; asked for only if you save an icon picture to your photo library. The app cannot read your photos.</li>
+      </ul>
+      <p>Choosing a game to import uses the system's own file picker, which gives the app access only to the file or folder you pick, at the moment you pick it.</p>
+
+      <h2>Who receives your data</h2>
+      <ul>
+        <li><strong>Sentry</strong> (Functional Software, Inc.) processes crash and error reports on our behalf, in its EU data region. Sentry is a US company, so some access from the United States may occur; that access is covered by the EU&ndash;US Data Privacy Framework and the European Commission's standard contractual clauses.</li>
+        <li><strong>DigitalOcean</strong> hosts the game server on our behalf.</li>
+        <li><strong>Other players</strong> see your guest name and your chat messages, as part of playing with you.</li>
+      </ul>
+      <p>We do not give your data to anyone else, unless the law requires us to.</p>
 
       <h2>Accounts</h2>
-      <p>Accounts on this website are not open yet. If they are introduced later, this policy will be updated before any sign-up is possible, and will say what is collected and why.</p>
+      <p>Accounts are not open yet. Before any sign-up is possible, this policy will be updated to say what an account collects and why.</p>
 
       <h2>Children</h2>
-      <p>The app is not directed at children and does not knowingly collect personal information from anyone, including children. Because it collects nothing, there is nothing about a child for us to hold or delete.</p>
+      <p>The app is not directed at children under 16. Online play needs no name, e-mail address or other contact detail, and we do not knowingly collect personal information from children. If you believe a child has sent us personal information, contact us and we will delete it.</p>
 
-      <h2>Keeping your information</h2>
-      <p>We hold no data about you, so there is nothing for us to retain, secure or destroy. The data described above lives on your own device, protected by your device's own security and by Android's separation between apps.</p>
+      <h2>Your rights</h2>
+      <p>Under the GDPR you have the right to ask for access to the personal data we hold about you, and to ask us to correct it, delete it, restrict its use or give it to you in a portable form. You also have the right to object to processing that is based on our legitimate interests, which covers crash reports and server logs. To use any of these rights, write to the address below.</p>
+      <p>We hold very little that points to you, so it helps to tell us your guest name, roughly when you played, or your device model. If you are not satisfied with our answer, you may complain to a data protection authority. In the Netherlands that is the <em>Autoriteit Persoonsgegevens</em>; you may also go to the authority where you live.</p>
 
       <h2>Deleting your data</h2>
-      <p>Uninstalling the app removes everything it stored, including imported games, settings and saves. On Android you can also clear the app's data from Settings without uninstalling. On Linux, deleting the app's data directory has the same effect.</p>
-      <p>If you have used an online server, ask that server's operator about anything it holds; we cannot act on their behalf.</p>
+      <p>Uninstalling the app removes everything it stored on your device, including imported games, settings, saves and your guest identity. On Android you can also clear the app's data from Settings without uninstalling. On iOS, deleting the app has the same effect. On Linux, deleting the app's data directory does.</p>
+      <p>Crash reports and server logs are deleted on their own, as described above. You can ask us to delete them sooner.</p>
 
       <h2>This website</h2>
-      <p>This site is a set of static pages with no accounts, no comments and no forms. It sets no cookies and runs no analytics. It loads a web font from Google Fonts, which means your browser requests that font file from Google's servers and Google will see the IP address making the request; nothing else is sent. The site is hosted on GitHub Pages, and GitHub may keep server logs of requests as part of operating the service.</p>
+      <p>This site is a set of static pages with no accounts, no comments and no forms. It sets no cookies and runs no analytics. It loads a web font from Google Fonts, which means your browser requests that font file from Google's servers, and Google sees the IP address making the request; nothing else is sent. The site is hosted on GitHub Pages, and GitHub may keep server logs of requests as part of operating the service.</p>
 
       <h2>Changes to this policy</h2>
-      <p>If this policy changes, the date at the top of the page changes with it. Material changes affecting what the app collects will be described here rather than made quietly.</p>
+      <p>If this policy changes, the date at the top of the page changes with it. Material changes to what the app collects will be described here rather than made quietly.</p>
 
       <h2>Contact</h2>
       <p>Questions about this policy, or any request concerning your data, can be sent to <a href="mailto:support@jubinganga.com">support@jubinganga.com</a>.</p>
@@ -117,7 +164,7 @@
 <footer class="footer">
   <div class="wrap">
     <div class="footer__in">
-      <p>Pixel Rewind Player &mdash; a player for N-Gage-era games on Android and Linux.<br>
+      <p>Pixel Rewind Player &mdash; a player for N-Gage-era games on Android, iOS and Linux.<br>
          You bring the games; the app brings nothing but the machinery to run them.</p>
       <nav class="footer__links" aria-label="Footer">
         <a href="index.html">Home</a>
