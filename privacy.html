@@ -34,7 +34,7 @@
   <div class="pagehead">
     <div class="wrap narrow">
       <h1>Privacy Policy</h1>
-      <p class="updated">Last updated: 2 October 2026</p>
+      <p class="updated">Last updated: 3 October 2026</p>
     </div>
   </div>
 
@@ -44,7 +44,7 @@
       <p class="lede">Pixel Rewind Player collects as little as it can. This page sets out exactly what the app stores, what leaves your device and why, who receives it, and what it never touches.</p>
 
       <div class="callout">
-        <p><strong>The short version.</strong> The app has no advertising, no advertising identifiers and no usage analytics, and we never sell your data or share it for marketing. It does send <strong>crash and error reports</strong> to Sentry, a diagnostics service, so we can fix what breaks. If you play online, the game server keeps a record of your <strong>online name</strong> and of the <strong>matches you play</strong>, including your moves and any <strong>chat messages</strong> you send in them, and it sees your IP address. Games you import stay on your device.</p>
+        <p><strong>The short version.</strong> The app has no advertising, no advertising identifiers and no usage analytics, and we never sell your data or share it for marketing. It does send <strong>crash and error reports</strong> to Sentry, a diagnostics service, so we can fix what breaks, and some of those reports are passed on to an AI coding assistant that helps us fix them. If you play online, the game server keeps a record of your <strong>online name</strong> and of the <strong>matches you play</strong>, including your moves and any <strong>chat messages</strong> you send in them, and it sees your IP address. While you wait for a match, your online name can be announced in the players' Telegram group. Games you import stay on your device.</p>
       </div>
 
       <h2>Who this applies to</h2>
@@ -71,11 +71,11 @@
         <li><strong>The structure of the app's screen</strong> at the time of the failure: which of the app's buttons and panels were showing. No screenshot is taken.</li>
         <li><strong>A trail of recent actions</strong> (&ldquo;breadcrumbs&rdquo;): which screens were opened and which buttons were pressed before the failure. Text you type is not recorded.</li>
         <li><strong>A random installation identifier</strong> that Sentry's library creates, so repeat problems on one device can be told apart from problems on many. It is not linked to your name or to any account.</li>
-        <li><strong>Performance measurements</strong>, such as how long the app takes to start and to change screens.</li>
       </ul>
       <p>On Android 11 and later, when the app starts, it also reads the system's record of how its previous run ended. That lets it report cases where the system closed it unexpectedly, for example for running out of memory.</p>
-      <p>Sentry's servers necessarily see your device's IP address when a report is sent. We do not use it to identify you. Reports are sent over an encrypted connection.</p>
+      <p>Sentry's servers see your device's IP address when a report is sent, as any internet server does, but they are set not to store it. Reports are sent over an encrypted connection. The app does not measure its own performance or record how you use it beyond the trail of actions in a report.</p>
       <p><strong>Why:</strong> the app runs old games on a wide range of phones, tablets and TVs we will never own, and a report is often the only way to learn that something broke and why. Our legal basis is our legitimate interest in keeping the app working (Article 6(1)(f) GDPR). Sentry deletes reports automatically after at most 90 days.</p>
+      <p>To fix faults faster, the technical part of a new kind of report &mdash; the error, stack trace, device details, recent actions and log &mdash; is passed to <strong>Jules</strong>, Google's AI coding assistant, which looks for the cause in our source code and proposes a fix for us to review. IP addresses are removed first, and so is the part of the report about the user. The log can still contain the online name you were using. What Jules is given stays in our Jules account as part of that fix. The same applies to the game server's own fault reports.</p>
       <p>There is currently no switch in the app to turn crash reporting off. If you object to it, you have the right to tell us so (see &ldquo;Your rights&rdquo;), and the app sends nothing while your device is offline.</p>
 
       <h2>Online play</h2>
@@ -110,6 +110,8 @@
       </ul>
       <p>The database does not store IP addresses. These records are kept for as long as the online service runs, because rankings are rebuilt from the full match history. You can ask us to delete yours at any time (see &ldquo;Deleting your data&rdquo;).</p>
       <p>Separately, the server keeps an operational log of connections and matches so we can find and fix faults, such as a match that froze. It can include IP addresses, and when detailed logging is switched on to investigate a problem, the full content of match traffic, chat included. The log has a fixed maximum size: once it is full, the oldest entries are deleted as new ones arrive, and the whole log is erased whenever the server is updated. The server also reports its own faults to Sentry.</p>
+      <h3>Match announcements on Telegram</h3>
+      <p>When it is switched on, the server posts to a group on Telegram that players can join, so that someone waiting for an opponent can be found. A post says that a player, by online name, is waiting for a match, and is updated when that player leaves the queue, when the match starts with the other players' online names, and with the result. Only the online name is posted, never anything else about you. Posts stay in the group until they are deleted; we delete posts that name you if you ask.</p>
       <p><strong>Why:</strong> to connect you with other players, run the match and keep your rankings, which is the service you asked for (Article 6(1)(b) GDPR). We also do it to keep the service working and free of abuse, which is our legitimate interest (Article 6(1)(f) GDPR).</p>
       <p><strong>Please note:</strong> the online protocol these games use was designed in 2008 and does not encrypt its traffic. Your guest name, moves and chat travel between your device and the server unencrypted, as they did on the original service.</p>
 
@@ -140,7 +142,9 @@
       <h2>Who receives your data</h2>
       <ul>
         <li><strong>Sentry</strong> (Functional Software, Inc.) processes crash and error reports on our behalf, in its EU data region. Sentry is a US company, so some access from the United States may occur; that access is covered by the EU&ndash;US Data Privacy Framework and the European Commission's standard contractual clauses.</li>
+        <li><strong>Google</strong> (Google LLC, through Jules) receives the technical part of some error reports, with IP addresses removed, to help us find and fix the fault. Google is a US company; the transfer is covered by the EU&ndash;US Data Privacy Framework.</li>
         <li><strong>DigitalOcean</strong> hosts the game server on our behalf.</li>
+        <li><strong>Telegram</strong> (Telegram Messenger Inc.) carries the match announcements described above, which show online names to the members of the group.</li>
         <li><strong>Other players</strong> see your online name, your chat messages, and your results in the rankings, as part of playing with you.</li>
       </ul>
       <p>We do not give your data to anyone else, unless the law requires us to.</p>
@@ -155,10 +159,10 @@
       <p>Under the GDPR you have the right to ask for access to the personal data we hold about you, and to ask us to correct it, delete it, restrict its use or give it to you in a portable form. You also have the right to object to processing that is based on our legitimate interests, which covers crash reports, server logs and the recordings of matches. To use any of these rights, write to the address below.</p>
       <p>We hold very little that points to you, so it helps to tell us your online name, roughly when you played, or your device model. If you are not satisfied with our answer, you may complain to a data protection authority. In the Netherlands that is the <em>Autoriteit Persoonsgegevens</em>; you may also go to the authority where you live.</p>
 
-      <h2>Deleting your data</h2>
+      <h2 id="deleting-your-data">Deleting your data</h2>
       <p>Uninstalling the app removes everything it stored on your device, including imported games, settings, saves and your online identity. On Android you can also clear the app's data from Settings without uninstalling. On iOS, deleting the app has the same effect. On Linux, deleting the app's data directory does.</p>
       <p>Uninstalling does not reach the game server. To have your player record, your device-key hash and your name removed from the server's match records, e-mail us your online name from the address below, which you can copy from the app's settings (<strong>Your online name</strong>). We delete the player record and its device keys, so the server no longer knows you as a player and your matches stop counting towards any ranking. The records of matches you took part in stay, because the other players' rankings are built from them; they keep the online name that was shown in each match, and their recordings keep what was sent in it. Choosing an online name that does not identify you keeps those records anonymous from the start.</p>
-      <p>Crash reports and server logs are deleted on their own, as described above. You can ask us to delete them sooner.</p>
+      <p>Crash reports and server logs are deleted on their own, as described above. You can ask us to delete them sooner, and to delete Telegram posts that name you.</p>
 
       <h2>This website</h2>
       <p>This site is a set of static pages with no accounts, no comments and no forms. It sets no cookies and runs no analytics. It loads a web font from Google Fonts, which means your browser requests that font file from Google's servers, and Google sees the IP address making the request; nothing else is sent. The site is hosted on GitHub Pages, and GitHub may keep server logs of requests as part of operating the service.</p>
