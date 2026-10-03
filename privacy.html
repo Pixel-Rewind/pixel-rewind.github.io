@@ -25,6 +25,7 @@
       <a href="index.html">Home</a>
       <a href="terms.html">Terms</a>
       <a href="privacy.html" aria-current="page">Privacy</a>
+      <a href="report.html">Report a player</a>
     </nav>
   </div>
 </header>
@@ -56,7 +57,7 @@
         <li><strong>Game files you import.</strong> When you point the app at a game, it copies the files it needs into its own storage so it can run them. These files are never uploaded.</li>
         <li><strong>Your settings.</strong> Screen orientation, layout size, control choices, language, sound and the other options on the settings screen.</li>
         <li><strong>Game saves and progress.</strong> Whatever the game itself writes, kept where that game expects it.</li>
-        <li><strong>Your online identity.</strong> Your online name, the account identifier the server knows you by, and a random device key that proves to the server that this device may change your name.</li>
+        <li><strong>Your online identity.</strong> Your online name, the account identifier the server knows you by, and a random device key that proves to the server that this device may change your name, and which version of the online rules you accepted.</li>
       </ul>
       <p>If you use <strong>Export saved data</strong>, the app writes your saves, records and online identity into a file and hands it to wherever you choose to keep it. That file is yours; we never see it.</p>
       <p>On Android, the system's own backup may copy the app's storage to your Google account, if you have backup turned on. That backup is between you and Google; we have no access to it.</p>
@@ -98,12 +99,13 @@
         <li>Your IP address, which any internet server sees when you connect.</li>
         <li>Match traffic: the moves you make, the hero you pick, the results, and the chat phrases you pick.</li>
         <li>Rooms you create or join, and their codes.</li>
+        <li>The version of the online rules you accepted, which the app sends each time it goes online.</li>
       </ul>
 
       <h3>What the server keeps</h3>
       <p>The server keeps a database so that it can run rankings and statistics, settle disputed results, and investigate faults and reports of abuse. It holds:</p>
       <ul>
-        <li><strong>A player record:</strong> your account identifier, your current online name, when you first and last played online, how many times you have logged in, and when you last changed your name.</li>
+        <li><strong>A player record:</strong> your account identifier, your current online name, when you first and last played online, how many times you have logged in, when you last changed your name, and which version of the online rules you accepted and when.</li>
         <li><strong>A one-way hash of your device key</strong>, never the key itself, so the database cannot be used to rename you.</li>
         <li><strong>Every match you play:</strong> the map, the players and their online names, the heroes, the results, captures, and the fame each player won or lost.</li>
         <li><strong>A recording of each match:</strong> everything the players sent during it, in order, with the time and the sender &mdash; moves, and also the chat phrases picked &mdash; plus the record of game events that the players' apps send at the end of a match.</li>
@@ -187,10 +189,11 @@
         <a href="index.html">Home</a>
         <a href="terms.html">Terms</a>
         <a href="privacy.html">Privacy</a>
+        <a href="report.html">Report a player</a>
       </nav>
     </div>
     <p class="disclaimer">
-      Pixel Rewind Player is an independent project and is not affiliated with, endorsed by or connected to Nokia, RedLynx, or any publisher of any game it can play. N-Gage and all game titles and trademarks belong to their respective owners.
+      Pixel Rewind Player is an independent project and is not affiliated with, endorsed by or connected to Nokia or any publisher of any game it can play. N-Gage and all game titles and trademarks belong to their respective owners.
     </p>
   </div>
 </footer>

@@ -35,6 +35,7 @@
       <a href="#games">Games</a>
       <a href="terms.html">Terms</a>
       <a href="privacy.html">Privacy</a>
+      <a href="report.html">Report a player</a>
     </nav>
   </div>
 </header>
@@ -65,7 +66,7 @@
         <p>Pixel Rewind ships no game content at all. On first start it asks where your game is &mdash; a free open-source one, or a copy you already own &mdash; and copies what it needs into its own storage. After that it starts straight into the game.</p>
         <p>It takes an N-Gage <code>.n-gage</code> file, or the folder holding a PC port's executable and its data files. Nothing you import is uploaded anywhere; it stays on the device.</p>
         <div class="callout">
-          <p><strong>Bring only games you have the right to use</strong> &mdash; a copy you own, or one that is freely and lawfully distributed. Using Pixel Rewind any other way is a breach of the <a href="terms.html">terms of use</a>. We supply no games, and we cannot help you find one.</p>
+          <p><strong>Bring only games you have the right to use</strong> &mdash; a copy you own, or one that is freely and lawfully distributed. Using Pixel Rewind any other way is a breach of the <a href="terms.html">terms of use</a>. The free sample games below are available to download here. We do not distribute commercial games.</p>
         </div>
       </div>
       <div class="screen">
@@ -77,8 +78,12 @@
   <section id="games">
     <div class="wrap">
       <p class="label">Start here</p>
-      <h2>Three free games, made for it</h2>
-      <p class="narrow">If you don't have a game to bring, these are built to run on Pixel Rewind and cost nothing. Each is open source, with artwork that is free to use.</p>
+      <h2>Four free games, made for it</h2>
+      <p class="narrow">If you don't have a game to bring, these are built to run on Pixel Rewind and cost nothing. All four have MIT-licensed code; artwork has its own credits and licence terms. Download an N-Gage package below and import it into the app.</p>
+
+      <div class="callout">
+        <p><strong>How to play:</strong> download a <code>.n-gage</code> file to your device. In Pixel Rewind, choose the N-Gage file import option and select that file. To switch games later, open the app's setup screen and import another package. These downloads are separate from the app.</p>
+      </div>
 
       <div class="games">
         <article class="game">
@@ -87,6 +92,8 @@
             <h3>Cloud Hop</h3>
             <p>A tap-to-fly game in landscape, played with the screen itself.</p>
             <p class="game__credit">Art by Kenney (CC0)</p>
+            <a class="btn game__download" href="public/downloads/CloudHop.n-gage" download aria-label="Download Cloud Hop N-Gage package">Download .n-gage</a>
+            <p class="game__credit"><a href="public/downloads/notices/cloud-hop.txt">Licence and credits</a></p>
           </div>
         </article>
 
@@ -96,6 +103,8 @@
             <h3>Starfall</h3>
             <p>A top-down space shooter in portrait, built around the D-pad and buttons.</p>
             <p class="game__credit">Art by Kenney (CC0)</p>
+            <a class="btn game__download" href="public/downloads/Starfall.n-gage" download aria-label="Download Starfall N-Gage package">Download .n-gage</a>
+            <p class="game__credit"><a href="public/downloads/notices/starfall.txt">Licence and credits</a></p>
           </div>
         </article>
 
@@ -105,9 +114,22 @@
             <h3>Relic Rush</h3>
             <p>Place a block, then walk the path you made. Steal the relic and run home.</p>
             <p class="game__credit">Art from Super Retro World by Gif, Noiracide and Romi</p>
+            <a class="btn game__download" href="public/downloads/RelicRush.n-gage" download aria-label="Download Relic Rush N-Gage package">Download .n-gage</a>
+            <p class="game__credit"><a href="public/downloads/notices/relic-rush.txt">Licence and credits</a></p>
+          </div>
+        </article>
+        <article class="game" id="tictactoe">
+          <img src="assets/img/tictactoe-board.svg" alt="Illustration of a tic-tac-toe board with three X marks along a winning diagonal." width="540" height="1108" loading="lazy">
+          <div class="game__body">
+            <h3>Tic-Tac-Toe</h3>
+            <p>Get three in a row against the offline bot, or find an online opponent. Use the arrows and OK to play.</p>
+            <p class="game__credit">Original code and procedural visuals (MIT)</p>
+            <a class="btn game__download" href="public/downloads/TicTacToe.n-gage" download aria-label="Download Tic-Tac-Toe N-Gage package">Download .n-gage</a>
+            <p class="game__credit"><a href="public/downloads/notices/tictactoe.txt">Licence and credits</a> &middot; <a href="#online">How online play works</a></p>
           </div>
         </article>
       </div>
+      <p class="small muted downloads-note">Cloud Hop, Starfall and Relic Rush are single-player games. Tic-Tac-Toe also supports online play with a compatible server.</p>
     </div>
   </section>
 
@@ -145,15 +167,21 @@
   <section id="online">
     <div class="wrap narrow">
       <p class="label">Online</p>
-      <h2>Games that had a server can have one again</h2>
-      <p>Some of these games shipped with online play against servers that were switched off years ago. Where that is the case, Pixel Rewind can connect to a community-run replacement instead, so the original online modes work again.</p>
-      <p>Online play is optional. Nothing about it is required to play on your own, and accounts are not open yet.</p>
-      <div class="btn-row">
-        <button class="btn" type="button" id="register2" aria-disabled="true">
-          Register <span class="chip">Soon</span>
-        </button>
+      <h2>Play online through Pixel Rewind</h2>
+      <p>For games with online modes, Pixel Rewind connects to a community-run server that finds other players and carries game updates between them. Some older games can use a replacement for their original server. Online play needs an internet connection and a server that supports your game; you can still play the single-player modes offline.</p>
+      <p>The app uses the same online identity and name across supported games. Accept the online terms when prompted. New account registration is not open yet; <a href="account.html">the account page explains the current options</a>. You can see your online name in the app's settings.</p>
+      <h3>Try it with Tic-Tac-Toe</h3>
+      <ol class="online-steps">
+        <li><a href="public/downloads/TicTacToe.n-gage" download>Download TicTacToe.n-gage</a> and import it into Pixel Rewind.</li>
+        <li>Choose <strong>Play online</strong> in the game's menu. The app connects using your existing online identity. The server must have Tic-Tac-Toe support enabled.</li>
+        <li>Wait for another player to choose <strong>Play online</strong>. Quick match pairs the two of you automatically: the first waiting player is X and moves first.</li>
+        <li>Use the arrows to choose an empty square and press <strong>OK</strong> to place your mark. Get three in a row, column or diagonal to win; a full board is a draw.</li>
+      </ol>
+      <p>Each online turn lasts <strong>30 seconds</strong>. Running out of time, leaving or losing your connection forfeits the match. <strong>Back</strong> cancels a search or resigns a match; <strong>OK</strong> after the result searches for another opponent. There are no ratings.</p>
+      <p>Only one online game can be active for the same account. Signing in to another game ends the first session and forfeits any live tic-tac-toe match.</p>
+      <div class="callout">
+        <p><strong>Want to play on your own?</strong> Choose <strong>Play vs bot</strong>. It works offline, without signing in. Online Tic-Tac-Toe uses the N-Gage download linked above.</p>
       </div>
-      <p class="note" id="note2" hidden role="status"></p>
     </div>
   </section>
 
@@ -168,10 +196,11 @@
         <a href="index.html">Home</a>
         <a href="terms.html">Terms</a>
         <a href="privacy.html">Privacy</a>
+        <a href="report.html">Report a player</a>
       </nav>
     </div>
     <p class="disclaimer">
-      Pixel Rewind Player is an independent project and is not affiliated with, endorsed by or connected to Nokia, RedLynx, or any publisher of any game it can play. N-Gage and all game titles and trademarks belong to their respective owners. Screenshots on this page show the app running freely redistributable sample games.
+      Pixel Rewind Player is an independent project and is not affiliated with, endorsed by or connected to Nokia or any publisher of any game it can play. N-Gage and all game titles and trademarks belong to their respective owners. Screenshots on this page show the app running freely redistributable sample games.
     </p>
   </div>
 </footer>

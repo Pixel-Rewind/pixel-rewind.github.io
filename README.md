@@ -8,9 +8,11 @@ index.html          home
 terms.html          terms of use
 privacy.html        privacy policy
 account.html        where the app's "Create an account" button lands (noindex)
+report.html         how to report a player (linked from the app's About and every page)
 assets/css/         one stylesheet
 assets/js/          one small script (the two "soon" buttons)
-assets/img/         logo, favicon, screenshots used on the page
+assets/img/         logo, favicon, screenshots and tic-tac-toe illustration
+public/downloads/   four N-Gage packages, licence notices and SHA256SUMS
 screenshots/        the original phone captures the page images were cut from
 .nojekyll           serve the files as-is, no Jekyll processing
 ```
@@ -112,3 +114,25 @@ these change:
   `logging`) and lost on redeploy.
 
 The Play Console Data safety form and the App Store privacy labels must say the same.
+
+## Free sample game downloads
+
+The home page links to `public/downloads/CloudHop.n-gage`, `Starfall.n-gage`,
+`RelicRush.n-gage` and `TicTacToe.n-gage`. Only N-Gage builds are included.
+These are copied from each game's `foss-games/<game>/dist/` directory in the game
+project; keep the source builds there for development. Licence and artwork notices
+are alongside the downloads in `public/downloads/notices/`.
+
+This is a static site served from the repository root. GitHub Pages preserves the
+`public/` directory in the URL: links must use `public/downloads/...`, rather than
+`/downloads/...`. Relative links also work when previewed or hosted under a project path.
+No build step is needed to publish the packages.
+
+After replacing a package, update its entry in `public/downloads/SHA256SUMS` and
+check the download locally. From that folder, `sha256sum -c SHA256SUMS` verifies all four.
+
+Cloud Hop, Starfall and Relic Rush are offline. Tic-Tac-Toe also offers quick-match
+online play in its N-Gage build, using the app's shared online identity. The home
+page describes the controls, matchmaking and 30-second turns. Online availability
+depends on a server deployed with the Tic-Tac-Toe service; adding the download
+does not deploy that service or open account registration.

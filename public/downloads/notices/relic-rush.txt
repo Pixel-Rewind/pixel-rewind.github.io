@@ -1,0 +1,57 @@
+RelicRush — licence and credits
+
+
+MIT License
+
+Copyright (c) 2026 Relic Rush contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+This license covers the original files under relic-rush. Kenney's Space
+Shooter Remastered artwork is supplied under CC0; see assets/KENNEY-LICENSE.txt.
+The DLL also compiles the existing Pixel Rewind inflate.c decompressor; no
+Reset Generation binary, artwork, audio, levels or game logic is included.
+
+
+ARTWORK CREDITS - RELIC RUSH
+
+Every sprite in this game is from the Super Retro World collection, used under its licence,
+which permits commercial use and asks for credit. The authors are:
+
+    Gif        (@gif_not_jif)
+    Noiracide  (@Noiracide)
+    Romi       (@DessRomaric)
+
+Packs used:
+
+    Super Retro World - Character Pack   the two heroes and the relic chests
+    Super Retro World - Interior Pack    the floor, the home rugs, the wall and the braziers
+
+What was done to them: sprites were cut out of the pack sheets; one stone tile was recoloured
+into the three board states, each claimed one given a gold rim; and a brazier was composed
+from the pack's stone bowl and three frames of its fire animation. assets/manifest.json records
+the source file and the exact crop behind every sprite. The originals are not redistributed
+here, only this game's own cut-down artwork, baked into relicrush.pak.
+
+The pack licence also asks that assets not be distributed directly, even modified. Nothing in
+this folder is offered as an asset pack or as a substitute for buying one; please support the
+authors by buying the packs if you want to use this artwork in your own project.
+
+Relic Rush's own code is MIT licensed - see LICENSE.txt. The code licence does not extend to
+the artwork, which stays under the Super Retro World licence above.

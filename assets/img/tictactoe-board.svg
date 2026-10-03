@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="540" height="1108" viewBox="0 0 540 1108">
+  <rect width="540" height="1108" fill="#0b1322"/>
+  <rect x="24" y="24" width="492" height="1060" fill="#14223a" stroke="#27405f" stroke-width="4"/>
+  <g font-family="monospace" text-anchor="middle">
+    <text x="270" y="175" fill="#5bc8e8" font-size="42" font-weight="bold">TIC-TAC-TOE</text>
+    <text x="270" y="220" fill="#8ea6c4" font-size="23">THREE IN A ROW</text>
+  </g>
+  <g stroke="#5bc8e8" stroke-width="6">
+    <path d="M205 350V740M335 350V740M75 480H465M75 610H465"/>
+  </g>
+  <g stroke="#f6a44c" stroke-width="12" fill="none">
+    <path d="M110 385L170 445M170 385L110 445M240 515L300 575M300 515L240 575M370 645L430 705M430 645L370 705"/>
+  </g>
+  <g stroke="#9fe8fb" stroke-width="12" fill="none">
+    <circle cx="270" cy="415" r="34"/><circle cx="140" cy="545" r="34"/>
+  </g>
+  <path d="M95 370L445 720" stroke="#f2688a" stroke-width="6"/>
+  <g font-family="monospace" text-anchor="middle" font-size="25">
+    <text x="270" y="875" fill="#dfe8f5">PLAY VS BOT</text>
+    <text x="270" y="930" fill="#5bc8e8">PLAY ONLINE</text>
+    <text x="270" y="1020" fill="#8ea6c4" font-size="18">BOARD ILLUSTRATION</text>
+  </g>
+</svg>
