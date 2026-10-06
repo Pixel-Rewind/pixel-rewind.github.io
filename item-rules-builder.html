@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Item rules builder &mdash; Pixel Rewind Player</title>
+<meta name="description" content="Build an item ruleset for online matches and send it to us.">
+<meta name="theme-color" content="#0b1322">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/item-rules-builder.css">
+</head>
+<body>
+
+<!-- Not linked from anywhere on the site, on purpose: reached only by its direct link. -->
+
+<header class="topbar">
+  <div class="wrap topbar__in">
+    <a class="brand" href="index.html">
+      <img src="assets/img/favicon.svg" alt="" width="26" height="26">
+      Pixel Rewind
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="terms.html">Terms</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="report.html">Report a player</a>
+    </nav>
+  </div>
+</header>
+
+<main class="builder">
+
+  <div class="pagehead">
+    <div class="wrap narrow">
+      <h1>Item rules builder</h1>
+      <p class="updated">Community tool &middot; online matches</p>
+    </div>
+  </div>
+
+  <section>
+    <div class="wrap narrow">
+      <p class="lede">In online matches, items drop onto the board every turn. An item ruleset can change <strong>which</strong> item drops and <strong>where</strong> it lands, based on what is on the board at that moment. Build one here, check it, and send it to us.</p>
+
+      <ol class="online-steps">
+        <li><strong>The game decides how many items drop.</strong> A ruleset never changes that.</li>
+        <li><strong>For each item, the game rolls one.</strong> Your <em>which-item rules</em> can replace it with another.</li>
+        <li><strong>The game picks a random spot.</strong> Your <em>where rules</em> can choose the spot instead, or say that nothing drops this time.</li>
+      </ol>
+      <p class="help">Rules see the board as it is right now: heroes, health, territory, princesses, items lying around and carried, Special Power, the round, and who can reach which cell first. They cannot remember what happened earlier in the match. Every player in the match runs the same ruleset on the same board, so everyone always sees the same items.</p>
+
+      <div class="callout">
+        <p><strong>Nothing leaves your browser until you send it.</strong> This page does not upload anything. Your draft is kept on this device. Every ruleset we receive is first tried in a test mode, where it only reports what it would have done, before it is ever used in a real match.</p>
+      </div>
+
+      <h4>Start from</h4>
+      <div class="row">
+        <select id="template" class="grow" aria-label="Start from a template"></select>
+        <button class="btn btn--small" type="button" data-act="template">Load</button>
+      </div>
+      <p class="hint" id="templateHint">Pick a ready-made ruleset to see how it is built, then change it.</p>
+
+      <details class="ref" style="margin-top:14px">
+        <summary>Paste a ruleset someone sent you</summary>
+        <div>
+          <textarea id="importText" spellcheck="false" placeholder='{ "typeRules": [ ... ] }'></textarea>
+          <div class="btn-row" style="margin-top:10px">
+            <button class="btn btn--small" type="button" data-act="import">Load it</button>
+          </div>
+          <ul class="issues" id="importIssues" style="margin-top:12px"></ul>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap narrow">
+      <p class="label">1 &middot; About</p>
+      <h2>Your ruleset</h2>
+      <div id="sec-meta"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap narrow">
+      <p class="label">2 &middot; Standing</p>
+      <h2>Who is winning</h2>
+      <p class="help">Rules can ask who is <strong>leading</strong> and who is <strong>trailing</strong>, and by how much. Each player's standing is worked out from what they have: every number below is multiplied by its weight, and the results are added up. The leader is the player still in the match with the highest standing, the trailer the one with the lowest. Leave everything at 0 if your rules don't use the standing.</p>
+      <div id="sec-score"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap narrow">
+      <p class="label">3 &middot; Item mix</p>
+      <h2>Starting weights</h2>
+      <p class="help">When a which-item rule applies, the item is drawn again from a set of <strong>weights</strong>. Weights are relative: Spring 3 and Teleport 1 means 75&nbsp;% Springs and 25&nbsp;% Teleports. The rules then raise, lower or replace these weights before the draw.</p>
+      <div id="sec-base"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap narrow">
+      <p class="label">4 &middot; Item luck</p>
+      <h2>The fair deal</h2>
+      <p class="help">Standing says who is winning the match. The fair deal says who has had the luck <strong>with items</strong>. Give each item a value. Each player's <em>item value</em> is then everything their hero and monsters carry, plus the items on the board that they would reach first (shared with the next player when the race is close). The player with the least item value, for their standing, is the one <strong>owed</strong> the next item. Where rules can then put items on their side of the board.</p>
+      <div id="sec-deal"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap narrow">
+      <p class="label">5 &middot; Which item</p>
+      <h2>Which-item rules</h2>
+      <p class="help">Checked from top to bottom for every item the game is about to drop. <strong>Every rule whose conditions all hold</strong> changes the weights. The changes add up, unless a rule says to stop. If at least one rule held, the item is drawn again from the resulting weights. If none held, the game's own item stays.</p>
+      <ul class="hint">
+        <li>A rule that holds re-draws the item, <strong>even if it changes nothing</strong>. To cap an item, put the cap in the rule's conditions.</li>
+        <li>A Tube the game rolls is always kept: which-item rules never touch it, and never make one. The Wand is never drawn by the rules either.</li>
+        <li>Changes in one rule apply in this order: set, then add, then multiply.</li>
+        <li>The standard weights during a match: Spring 2500, Tube 1500, Monster Box 1500, Paintbrush 1000, Battery 1000, Teleport 750, BFGP 750, The Ring 500, Grenade 500, Wand 250, Reset Button 1. The reference at the bottom has the opening spread's.</li>
+      </ul>
+      <div id="sec-type"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap narrow">
+      <p class="label">6 &middot; Preview</p>
+      <h2>What it does to the item mix</h2>
+      <p class="help">Tick the which-item rules that hold at some moment in a match to see the share of each item while they do. This uses the standard online weights.</p>
+      <div id="sec-preview"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap narrow">
+      <p class="label">7 &middot; Where</p>
+      <h2>Where rules</h2>
+      <p class="help">Checked from top to bottom for every item about to drop, the Tube included. A rule whose conditions all hold can choose the spot, or drop nothing. If several rules choose a spot, <strong>the last one wins</strong>. Once a rule says &ldquo;drop nothing&rdquo;, nothing drops. If no rule chooses a spot, the game's random spot stays.</p>
+      <p class="help">To choose a spot, every free cell is <strong>scored</strong>: each factor's value at that cell, times its weight, added up. The item starts at the highest-scoring cell. A <strong>negative</strong> weight on a distance means <em>closer is better</em>; a positive one, <em>further</em>. The weights also set priorities: &minus;1000 per step towards one hero beats +400 per step away from another.</p>
+      <div id="sec-place"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap narrow">
+      <p class="label">8 &middot; Check and send</p>
+      <h2>Your ruleset</h2>
+      <div id="sec-out"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap narrow ref">
+      <p class="label">Reference</p>
+      <h2>Every condition, factor and item</h2>
+      <div id="sec-ref"></div>
+      <details>
+        <summary>Travel time and the head start</summary>
+        <div>
+          <p class="help">Some factors measure <strong>travel time</strong>: how long a player's hero takes to walk to a cell, using the game's movement costs. 1000 is one full turn. With the standard rules, one step costs:</p>
+          <table>
+            <tr><th>Step onto</th><th>Travel time</th></tr>
+            <tr><td>own combo</td><td>16</td></tr>
+            <tr><td>own block, any castle</td><td>250</td></tr>
+            <tr><td>enemy block</td><td>500</td></tr>
+            <tr><td>neutral ground, enemy combo</td><td>666</td></tr>
+          </table>
+          <p class="help" style="margin-top:12px">A hero carrying a princess walks more slowly, and a movement boost makes it faster. A player with no hero on the board counts from their castle, a turn late. A cell nobody can get to counts as 100&nbsp;000 (100 turns).</p>
+          <p class="help">The <strong>head start</strong> of a where rule is the lead the owed player should have over their nearest rival. Pair it with the factor &ldquo;distance from the target lead&rdquo; at a negative weight:</p>
+          <table>
+            <tr><th>Head start</th><th>The item lands</th></tr>
+            <tr><td>0</td><td>as an even race between the owed player and their nearest rival</td></tr>
+            <tr><td>250</td><td>a little on the owed player's side (one own-block step)</td></tr>
+            <tr><td>1000</td><td>a full turn on their side: theirs to take</td></tr>
+            <tr><td>100000</td><td>at their feet</td></tr>
+          </table>
+          <p class="help" style="margin-top:12px">Leads come in whole steps, so the item lands on the nearest lead the board allows. On open neutral ground a step is 666.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Tips and common mistakes</summary>
+        <div>
+          <ul class="help">
+            <li><strong>No starting weights means all zero.</strong> A rule that only multiplies then changes nothing, and the game's own item stays.</li>
+            <li><strong>Multiplying can't bring an item in.</strong> 0 &times; 2 is still 0. Use <em>add</em> or <em>set</em>.</li>
+            <li><strong>Random spread needs the right weight.</strong> &ldquo;Random&rdquo; goes from 0 to 255. With weight 1 next to distances of 1000 per step it only breaks ties. Next to 10 per step it lets the item land almost anywhere.</li>
+            <li><strong>Steps and travel time are different scales.</strong> One neutral step is 1 in a distance but 666 in a travel time.</li>
+            <li><strong>Standing thresholds depend on the standing weights.</strong> Change a weight and every &ldquo;lead &ge; 50&rdquo; condition means something else.</li>
+            <li><strong>Leave the opening alone</strong> by adding &ldquo;Opening spread is No&rdquo; to a rule.</li>
+            <li><strong>OR</strong> is two rules with the same changes. <strong>Otherwise</strong> is specific rules with &ldquo;stop&rdquo; first, then a rule with no conditions last.</li>
+            <li><strong>Untested items</strong> exist in the game but have never dropped in an online match. Rules can make them, but nobody knows yet how they behave there.</li>
+          </ul>
+        </div>
+      </details>
+      <details>
+        <summary>Limits</summary>
+        <div>
+          <p class="help">Up to 32 which-item rules and 32 where rules, 8 conditions per rule. Weights &plusmn;1&nbsp;000&nbsp;000, multipliers 0 to 1000 (up to three decimals), item values 0 to 10&nbsp;000, head start &plusmn;100&nbsp;000. Condition values are whole numbers.</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer__in">
+      <p>Pixel Rewind Player &mdash; a player for N-Gage-era games on Android and Linux.<br>
+         You bring the games; the app brings nothing but the machinery to run them.</p>
+      <nav class="footer__links" aria-label="Footer">
+        <a href="index.html">Home</a>
+        <a href="terms.html">Terms</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="report.html">Report a player</a>
+      </nav>
+    </div>
+    <p class="disclaimer">
+      Pixel Rewind Player is an independent project and is not affiliated with, endorsed by or connected to Nokia or any publisher of any game it can play. N-Gage and all game titles and trademarks belong to their respective owners.
+    </p>
+  </div>
+</footer>
+
+<script src="assets/js/item-rules-builder.js"></script>
+</body>
+</html>
