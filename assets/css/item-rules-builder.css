@@ -211,3 +211,7 @@
   .numgrid > div { grid-template-columns: 1fr; }
   .numgrid input { grid-row: auto; grid-column: auto; }
 }
+
+.compat--bad { color: var(--pink); }
+#checkText { min-height: 130px; }
+#promptText { max-height: 420px; }

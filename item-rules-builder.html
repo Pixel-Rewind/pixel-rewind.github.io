@@ -6,7 +6,12 @@
 <title>Item rules builder &mdash; Pixel Rewind Player</title>
 <meta name="description" content="Build an item ruleset for online matches and send it to us.">
 <meta name="theme-color" content="#0b1322">
-<meta name="robots" content="noindex, nofollow">
+<!-- Kept out of search engines by these tags alone. Do not add it to robots.txt: a crawler that may not
+     fetch the page never sees the noindex, and robots.txt would publish the address. -->
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet">
+<meta name="bingbot" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="no-referrer">
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -46,6 +51,10 @@
     <div class="wrap narrow">
       <p class="lede">In online matches, items drop onto the board every turn. An item ruleset can change <strong>which</strong> item drops and <strong>where</strong> it lands, based on what is on the board at that moment. Build one here, check it, and send it to us.</p>
 
+      <div class="callout">
+        <p><strong>Too complicated?</strong> <a href="#ai">Give your AI assistant our instructions</a> and design a ruleset just by describing what you want. Then paste its answer into the <a href="#check">checker</a>.</p>
+      </div>
+
       <ol class="online-steps">
         <li><strong>The game decides how many items drop.</strong> A ruleset never changes that.</li>
         <li><strong>For each item, the game rolls one.</strong> Your <em>which-item rules</em> can replace it with another.</li>
@@ -63,17 +72,33 @@
         <button class="btn btn--small" type="button" data-act="template">Load</button>
       </div>
       <p class="hint" id="templateHint">Pick a ready-made ruleset to see how it is built, then change it.</p>
+    </div>
+  </section>
 
+  <section id="ai">
+    <div class="wrap narrow">
+      <p class="label">Too complicated?</p>
+      <h2>Let your AI assistant build it with you</h2>
+      <p class="help">Copy the instructions below and paste them into the AI chat assistant you use. They explain exactly how rulesets work. The assistant will then ask what kind of rules you want, talk them through with you, and write the ruleset. Paste its answer into the checker below.</p>
+      <div class="btn-row">
+        <button class="btn btn--primary" type="button" data-act="copy-prompt">Copy the instructions</button>
+        <button class="btn btn--small" type="button" data-act="download-prompt">Download as .txt</button>
+      </div>
+      <p class="status" id="promptStatus" role="status"></p>
       <details class="ref" style="margin-top:14px">
-        <summary>Paste a ruleset someone sent you</summary>
-        <div>
-          <textarea id="importText" spellcheck="false" placeholder='{ "typeRules": [ ... ] }'></textarea>
-          <div class="btn-row" style="margin-top:10px">
-            <button class="btn btn--small" type="button" data-act="import">Load it</button>
-          </div>
-          <ul class="issues" id="importIssues" style="margin-top:12px"></ul>
-        </div>
+        <summary>Read the instructions first</summary>
+        <div><pre class="json" id="promptText"></pre></div>
       </details>
+    </div>
+  </section>
+
+  <section id="check">
+    <div class="wrap narrow">
+      <p class="label">Checker</p>
+      <h2>Check a ruleset</h2>
+      <p class="help">Paste a ruleset here: your AI assistant's answer, a file someone sent you, or a share link. It is checked as you paste. A valid ruleset fills in the whole form below, ready to change, preview and send.</p>
+      <textarea id="checkText" spellcheck="false" placeholder='{ "mode": "shadow", "typeRules": [ ... ], "placeRules": [ ... ] }'></textarea>
+      <div id="checkResult" style="margin-top:12px"></div>
     </div>
   </section>
 

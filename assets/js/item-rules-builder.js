@@ -1099,6 +1099,7 @@
   }
 
   document.addEventListener("input", function (e) {
+    if (e.target.id === "checkText") { checkSoon(); return; }
     if (e.target.matches("input[type=text], input[type=number], textarea")) onValue(e);
   });
   document.addEventListener("change", function (e) {
@@ -1166,7 +1167,17 @@
         state.placeRules[i].place.splice(j, 1);
         break;
       case "template": loadTemplate(); return;
-      case "import": importText(); return;
+      case "undo-load":
+        if (!undoState) return;
+        state = undoState;
+        undoState = null;
+        $("checkResult").innerHTML = '<p class="hint">Your earlier ruleset is back. The pasted one is still in the box: edit it to load it again.</p>';
+        break;
+      case "copy-prompt": copyText(buildPrompt(), "Instructions copied. Paste them into your AI assistant.", "promptStatus"); return;
+      case "download-prompt":
+        saveFile(buildPrompt(), "item-rules-instructions.txt", "text/plain");
+        say("Downloaded item-rules-instructions.txt.", "promptStatus");
+        return;
       case "copy": copyText(pretty(toJSON(state)), "JSON copied."); return;
       case "download": download(); say("Downloaded " + fileName() + "."); return;
       case "share": copyText(shareLink(), "Share link copied."); return;
@@ -1204,32 +1215,69 @@
     renderAll();
   }
 
-  function importText() {
-    var text = $("importText").value.trim();
-    var box = $("importIssues");
+  // The checker: every paste is read and checked; a valid ruleset replaces the form (with an undo)
+  var checkTimer = null, undoState = null;
+  function checkSoon() {
+    clearTimeout(checkTimer);
+    checkTimer = setTimeout(checkPasted, 250);
+  }
+
+  function checkPasted() {
+    var text = $("checkText").value.trim();
+    var box = $("checkResult");
+    if (!text) { box.innerHTML = ""; return; }
     var o;
     try { o = parseShared(text); } catch (err) {
-      box.innerHTML = '<li class="err"><b>Error</b>' + esc(err.message) + "</li>";
+      box.innerHTML = verdict(false, "Not a ruleset") + '<ul class="issues"><li class="err"><b>Error</b>' + esc(err.message) + "</li></ul>";
       return;
     }
     var errors = validate(o);
     if (errors.length) {
-      box.innerHTML = errors.map(function (e) { return '<li class="err"><b>Error</b>' + esc(e) + "</li>"; }).join("");
+      box.innerHTML = verdict(false, "Not valid: " + errors.length + " problem" + (errors.length > 1 ? "s" : "")) +
+        '<ul class="issues">' + errors.map(function (e) { return '<li class="err"><b>Error</b>' + esc(e) + "</li>"; }).join("") + "</ul>" +
+        '<p class="hint">Nothing was loaded. If an AI assistant wrote it, paste these errors back to it and ask for a corrected version.</p>';
       return;
     }
-    if (!isEmpty() && !confirm("Replace what you have built so far with the pasted ruleset?")) return;
-    state = fromJSON(o);
-    ui.preview = {};
-    foldAll();
-    box.innerHTML = '<li class="info"><b>OK</b>Loaded.</li>';
-    renderAll();
+    var before = JSON.stringify(toJSON(state));
+    if (before !== JSON.stringify(toJSON(fromJSON(o)))) {
+      undoState = isEmpty() ? null : JSON.parse(JSON.stringify(state));
+      state = fromJSON(o);
+      ui.preview = {};
+      foldAll();
+      renderAll();
+    }
+    var warnings = lint(state, toJSON(state));
+    var recent = needsRecent(toJSON(state));
+    var notes = warnings.filter(function (w) { return w[0] === "warn"; });
+    box.innerHTML = verdict(true, "Valid ruleset: loaded into the form below") +
+      '<p class="hint">' + state.typeRules.length + " which-item rule" + (state.typeRules.length === 1 ? "" : "s") + ", " +
+      state.placeRules.length + " where rule" + (state.placeRules.length === 1 ? "" : "s") + ". " +
+      (recent ? "Needs a recent app." : "Works with every app that has item rules.") +
+      (notes.length ? " It has " + notes.length + " thing" + (notes.length > 1 ? "s" : "") + " worth checking: see <a href=\"#sec-out\">Check and send</a>." : "") + "</p>" +
+      '<div class="btn-row">' + (undoState ? '<button class="btn btn--small" type="button" data-act="undo-load">Undo: bring back what I had</button>' : "") +
+      '<a class="btn btn--small" href="#sec-type">Go to the rules</a></div>';
   }
 
-  // A pasted ruleset: its JSON, or a share link to one
+  function verdict(ok, text) {
+    return '<span class="compat ' + (ok ? "compat--all" : "compat--bad") + '">' + (ok ? "✓ " : "✕ ") + esc(text) + "</span>";
+  }
+
+  // A pasted ruleset: its JSON, a share link to one, or an AI answer with the JSON inside
   function parseShared(text) {
     var m = /#r=([A-Za-z0-9_-]+)/.exec(text);
-    if (m) return JSON.parse(fromB64(m[1]));
-    try { return JSON.parse(text); } catch (err) { throw new Error("That is not valid JSON (" + err.message + ")."); }
+    if (m) {
+      try { return JSON.parse(fromB64(m[1])); } catch (err) { throw new Error("That share link is damaged or incomplete."); }
+    }
+    try { return JSON.parse(text); } catch (err) {
+      var fenced = /```(?:json)?\s*([\s\S]*?)```/.exec(text);
+      var inner = fenced ? fenced[1] : text.slice(text.indexOf("{"), text.lastIndexOf("}") + 1);
+      if (inner) {
+        try { return JSON.parse(inner); } catch (err2) {
+          throw new Error("That is not valid JSON (" + err2.message + "). Comments and commas after the last item are not allowed.");
+        }
+      }
+      throw new Error("That is not valid JSON (" + err.message + ").");
+    }
   }
 
   function toB64(s) {
@@ -1251,11 +1299,12 @@
     var base = (state.meta.name || "item-rules").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "item-rules";
     return base + ".json";
   }
-  function download() {
-    var blob = new Blob([pretty(toJSON(state))], { type: "application/json" });
+  function download() { saveFile(pretty(toJSON(state)), fileName(), "application/json"); }
+  function saveFile(text, name, type) {
+    var blob = new Blob([text], { type: type });
     var a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = fileName();
+    a.download = name;
     document.body.appendChild(a);
     a.click();
     setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 0);
@@ -1284,20 +1333,160 @@
     location.href = url;
   }
 
-  function copyText(text, done) {
+  function copyText(text, done, where) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(function () { say(done); }, function () { fallbackCopy(text, done); });
-    } else fallbackCopy(text, done);
+      navigator.clipboard.writeText(text).then(function () { say(done, where); }, function () { fallbackCopy(text, done, where); });
+    } else fallbackCopy(text, done, where);
   }
-  function fallbackCopy(text, done) {
+  function fallbackCopy(text, done, where) {
     var t = document.createElement("textarea");
     t.value = text;
     document.body.appendChild(t);
     t.select();
-    try { document.execCommand("copy"); say(done); } catch (err) { say("Copying failed: select the text and copy it by hand."); }
+    try { document.execCommand("copy"); say(done, where); } catch (err) { say("Copying failed: select the text and copy it by hand.", where); }
     t.remove();
   }
-  function say(text) { var s = $("status"); if (s) s.textContent = text; }
+  function say(text, where) { var s = $(where || "status"); if (s) s.textContent = text; }
+
+  // ------------------------------------------------------------------ instructions for an AI assistant
+
+  // Everything a chat assistant needs to write a valid ruleset, built from the same lists as the
+  // form, so the two can't disagree. It ends by having the assistant interview the visitor.
+  function buildPrompt() {
+    var page = location.href.split("#")[0];
+    var L = [];
+    function p(s) { L.push(s == null ? "" : s); }
+    function weights(k) {
+      var m = STD_MID[k] || 0, s = STD_START[k] || 0;
+      return m || s ? "standard weight " + m + " during play, " + s + " in the opening spread" : "standard weight 0 (never drops unless a rule makes it)";
+    }
+
+    p("You are going to help me design an ITEM RULESET for online matches of a turn-based board game that I play in the Pixel Rewind app. Read everything below carefully: it is the complete and exact specification. Do not invent fields, inputs, factors or items that are not listed here; anything not listed is rejected.");
+    p();
+    p("# The game, briefly");
+    p("Two to four players each have a hero on a square grid board. On their turn they place blocks to claim cells (their territory), build combos from their blocks, walk their hero across the board, fight other heroes, and try to steal other players' princesses and carry them back to their own castle. Items appear on the board every turn; a hero walking over one picks it up and can use it later. With the standard rules an item nobody picks up disappears after 3 rounds. Items: Spring (throws a hero 4 squares), Teleport, Battery (fills the Special Power meter at once), The Ring (invisibility for 3 rounds), Paintbrush (paints an instant 5-block combo), Grenade and BFGP (weapons; the BFGP is the strongest), Monster Box (summons a random monster that works for its owner), Tube (a cheap passage that refunds movement), Wand (turns a hero into a frog), and Reset Button (extremely rare).");
+    p();
+    p("# How item drops work, and what a ruleset can change");
+    p("1. The game decides HOW MANY items drop each time. A ruleset can never change that.");
+    p("2. For each item, the game rolls which item it is. TYPE RULES (\"typeRules\") may replace it with another item.");
+    p("3. The game picks a random cell for it. PLACE RULES (\"placeRules\") may choose the cell instead, or make nothing drop this time.");
+    p("Rules only see the board as it is at that moment (heroes, health, territory, princesses, items on the board and carried, Special Power, the round, who can reach which cell first). They have no memory of earlier turns. Every player's app runs the same ruleset on the same board, so everyone sees the same result. The very first items, placed before the first turn, are called the \"opening spread\".");
+    p();
+    p("# The JSON");
+    p("A ruleset is one JSON object. Every field is optional; an unknown field makes the whole ruleset invalid.");
+    p("{");
+    p("  \"mode\": \"shadow\",              always \"shadow\" (the server owner tests it first, then switches it on)");
+    p("  \"note\": \"Name (by Author): what it does\",");
+    p("  \"score\": { stat: weight, ... },   how players' standing is computed (see STANDING)");
+    p("  \"baseWeights\": \"match\" | { item: weight, ... },   the weights a type rule starts from");
+    p("  \"baseWeightsStart\": { item: weight, ... },   only beside an object baseWeights: separate weights for the opening spread");
+    p("  \"deal\": { \"values\": { item: value, ... }, \"catchUp\": n, \"catchUpFrom\": n },   the fair deal (see THE FAIR DEAL)");
+    p("  \"typeRules\": [ rule, ... ],");
+    p("  \"placeRules\": [ rule, ... ]");
+    p("}");
+    p("A type rule has only: \"when\", \"set\", \"add\", \"scale\", \"stop\", \"note\".");
+    p("A place rule has only: \"when\", \"place\", \"headStart\", \"suppress\", \"stop\", \"note\".");
+    p("Strict JSON only: double quotes, no comments, no trailing commas, whole numbers unless stated.");
+    p();
+    p("# Conditions (\"when\")");
+    p("\"when\" is a list of conditions; ALL must hold. No \"when\" (or an empty list) means the rule always holds.");
+    p("A condition is [input, op, value], or [input, item, op, value] for the inputs marked (takes an item).");
+    p("op is one of: < <= == != >= >. Values are whole numbers from -1000000000 to 1000000000. For \"type\" and \"engineType\" the value is an item name, e.g. [\"type\", \"==\", \"Bomb\"].");
+    p("OR = write the same change in two rules. A range = two conditions. \"Otherwise\" = specific rules with \"stop\": true first, a rule without \"when\" last.");
+    p();
+    p("## Inputs");
+    INPUTS.forEach(function (i) {
+      p("- \"" + i[0] + "\"" + (i[1] ? " (takes an item)" : "") + ": " + i[3].replace(/:$/, "") + "." + (i[4] ? " " + i[4] : "") + (i[5] ? " [RECENT]" : ""));
+    });
+    p("matchStart is 1 or 0. iteration counts the items of one drop from 0.");
+    p();
+    p("# Items");
+    p("Always write items by their rules name (first column).");
+    ITEMS.forEach(function (it) {
+      if (!it) return;
+      var notes = [];
+      if (!it[2]) notes.push("rules can NEVER make or remove it: never put it in set/add/scale");
+      if (!it[3]) notes.push("UNTESTED: exists in the game but has never dropped online; avoid unless I ask");
+      p("- " + it[0] + " (shown in the game as \"" + it[1] + "\"): " + weights(it[0]) + (notes.length ? "; " + notes.join("; ") : ""));
+    });
+    p();
+    p("# Type rules: which item drops");
+    p("For each item the game rolls (except a Tube: a rolled Tube is always kept and type rules are skipped):");
+    p("1. Type rules are read in order. EVERY rule whose conditions hold applies its changes; \"stop\": true ends the list.");
+    p("2. The first time any rule holds, the weights start from baseWeights: \"match\" = the standard weights listed above (opening-spread weights during the opening spread); an object = exactly those numbers; no baseWeights = ALL ZERO.");
+    p("3. A rule's changes apply in this order: \"set\" (weight becomes the number, -1000000..1000000), then \"add\" (added, may be negative, -1000000..1000000), then \"scale\" (multiplied, 0 to 1000, up to 3 decimals: 0.5 halves, 2 doubles, 0 removes). Weights never go below 0.");
+    p("4. If no rule held, the game's own item stays. If any rule held, a NEW item is drawn from the resulting weights (Tube and Wand are never drawn). If all weights are 0, the game's own item stays.");
+    p("Weights are relative: Spring 3 and Teleport 1 means 75% Springs, 25% Teleports.");
+    p("IMPORTANT: a type rule that holds re-draws the item even if it changes nothing. To cap an item, the cap must be in \"when\": {\"when\": [[\"itemsAnywhere\", \"BiggestFreakinGunPossible\", \">=\", 1]], \"set\": {\"BiggestFreakinGunPossible\": 0}}.");
+    p();
+    p("# Place rules: where it drops, or nothing");
+    p("For each item about to drop (the Tube included):");
+    p("1. Place rules are read in order. Each rule whose conditions hold: \"place\" replaces the cell scoring (the LAST holding rule with a place wins); \"suppress\": true means nothing drops (and it stays that way even if a later rule places); \"stop\": true ends the list.");
+    p("2. With a \"place\", every free cell gets a score = sum of (weight x factor value at that cell), weights -1000000..1000000. The item starts at the highest-scoring cell (ties: the top-most, then left-most). A NEGATIVE weight on a distance means closer is better, positive means further. The weights are priorities: \"distTrailerHero\": -1000, \"distLeaderHero\": 400 means being one step nearer the trailer always beats being two steps further from the leader.");
+    p("3. Without any place, the game's random cell stays.");
+    p("\"headStart\" (-100000..100000, default 0) belongs to a rule with \"place\" and only affects the factor needyLeadOff (see THE FAIR DEAL). [RECENT]");
+    p();
+    p("## Place factors");
+    FEATURES.forEach(function (f) {
+      var unit = f[4] === "steps" ? "steps across or down, no diagonals; a missing hero or castle counts as width+height" : f[4] === "half-steps" ? "steps, counted double" : f[4] === "travel" ? "travel time in thousandths of a turn" : "";
+      p("- \"" + f[0] + "\": " + f[1] + ". " + (f[2] ? f[2] + " " : "") + (unit ? "(" + unit + ")" : "") + (f[3] ? " [RECENT]" : ""));
+    });
+    p("\"noise\" is 0..255: with weight 1 next to distance weights of 1000 it only breaks ties; next to distance weights of 10 it lets the item land almost anywhere.");
+    p("Travel time: how long a hero takes to walk there using the game's movement costs; 1000 = one turn. One step onto: own combo 16, own block or any castle 250, enemy block 500, neutral ground or enemy combo 666. Unreachable = 100000. Steps and travel time are different scales: one neutral step is 1 in a distance factor but 666 in a travel-time factor.");
+    p();
+    p("# Standing (\"score\"): who leads and who trails");
+    p("Each player's standing = sum of (weight x stat). Weights -1000000..1000000. The leader is the living player with the highest standing, the trailer the lowest (ties: lower player number leads). With every weight 0, everyone is 0, scoreSpread is always 0 and player 1 counts as leader. Territory alone is often 15-25 per player; at the start of a match players are within a few points.");
+    SCORE.forEach(function (st) { p("- \"" + st[0] + "\": " + st[1] + ". " + st[2] + (st[3] ? " [RECENT]" : "")); });
+    p("A proven standing: {\"health\": 1, \"territory\": 1, \"comboCells\": 5, \"princessHome\": 40, \"carrying\": 20, \"carryHome\": 1, \"hero\": 30, \"jetpack\": 40, \"boxingGloves\": 60, \"monsters\": 35}, with \"clearly ahead\" at scoreSpread >= 50 and \"far ahead\" at >= 120.");
+    p();
+    p("# The fair deal (\"deal\") [RECENT]");
+    p("Standing says who is winning; the deal says who has had the luck with items.");
+    p("- \"values\": each item's worth, 0..10000 (only ratios matter). Suggested: Spring 10, Battery 15, RingOfInvisibility 20, Teleport 25, ComboBuilder 25, Wand 30, Bomb 35, MonsterTrainerBox 35, BiggestFreakinGunPossible 60, ResetButton 10. Tube 0.");
+    p("- A player's item value = items their hero and monsters carry, plus items on the board they would reach first (shared half/half with the next player in a dead heat, 3/4-1/4 at half a turn ahead, all theirs at a turn or more ahead).");
+    p("- The OWED (\"needy\") player is the one with the least item value for what they are entitled to. Everyone is entitled to 100%, plus \"catchUp\" % (0..100000) for every 100 standing points they are behind the leader beyond \"catchUpFrom\" points (0..1000000000). Example catchUp 100, catchUpFrom 50: 100 behind = owed until they have 1.5x an even player's value.");
+    p("- Without a deal, every item value is 0 and the owed player is simply the trailer.");
+    p("- Dealing an item: place {\"needyLeadOff\": -10, \"needyReach\": -2, \"noise\": 1} with headStart 0 = an even race between the owed player and their nearest rival; 250 = slightly their side (one own-block step); 1000 = a full turn their side; 100000 = at their feet.");
+    p("- Fair ground (nobody favoured): place {\"reachSpread\": -10, \"reachNearest\": -2, \"noise\": 1}.");
+    p();
+    p("# Compatibility");
+    p("Anything marked [RECENT] (the deal, headStart, the inputs equitySpread and needyDeficit, the factors needyReach, needyLead, needyLeadOff, contest, reachNearest, reachSpread, and a non-zero monsters weight) needs a recent version of the app. In a match where any player has an older app, the ruleset is not used at all. Mention this to me when you use them.");
+    p();
+    p("# Limits");
+    p("At most 32 type rules and 32 place rules, at most 8 conditions per rule.");
+    p();
+    p("# Common mistakes to avoid");
+    p("- No baseWeights + a rule that only scales = nothing changes (0 x anything = 0). Use \"baseWeights\": \"match\" for \"the normal mix, but...\".");
+    p("- scale cannot bring in an item whose weight is 0; use add or set.");
+    p("- Any type rule without \"when\" re-draws every item, which also removes the Wand.");
+    p("- Type rules never see a Tube, so [\"type\", \"==\", \"Tube\"] in a type rule never holds.");
+    p("- Conditions on scoreSpread/leader/trailer need non-zero \"score\" weights.");
+    p("- A rule after an always-holding rule with \"stop\": true is never reached.");
+    p("- Untested items: only if I explicitly want them, and warn me.");
+    p("- To leave the opening spread untouched, add [\"matchStart\", \"==\", 0] to the rules.");
+    p();
+    p("# Examples");
+    p("Fewer power spikes, at most one BFGP in play:");
+    p(compact({ mode: "shadow", baseWeights: "match", typeRules: [
+      { scale: { BiggestFreakinGunPossible: 0.4, Bomb: 0.6 }, add: { Spring: 500 } },
+      { when: [["itemsAnywhere", "BiggestFreakinGunPossible", ">=", 1]], set: { BiggestFreakinGunPossible: 0 } }] }));
+    p("Catch-up: strong items more common and dropped next to whoever is behind once someone leads by 50+:");
+    p(compact({ mode: "shadow", score: { health: 1, territory: 1, princessHome: 40, hero: 30 }, baseWeights: "match",
+      typeRules: [{ when: [["scoreSpread", ">=", 50]], scale: { BiggestFreakinGunPossible: 1.5, Teleport: 1.5, Spring: 0.7 } }],
+      placeRules: [{ when: [["scoreSpread", "<", 50]], stop: true },
+        { when: [["type", "==", "BiggestFreakinGunPossible"]], place: { distTrailerHero: -1000, distLeaderHero: 400, noise: 1 }, stop: true }] }));
+    p("Items away from all heroes, towards the middle:");
+    p(compact({ mode: "shadow", placeRules: [{ place: { distNearestHero: 100, distCenter: -60, noise: 1 } }] }));
+    p();
+    p("# How to work with me");
+    p("1. Start by asking me what kind of rules I want: what feels wrong or boring about item drops today, or what kind of match I want (for example: comebacks for whoever is behind, less luck, more chaos, fewer strong weapons, a slow build-up, items placed fairly between players). Offer a few ideas if I am unsure.");
+    p("2. Ask a few short follow-up questions if needed (how strong the effect should be, when it should kick in, whether to touch the opening spread, whether it may need a recent app). Do not ask me about JSON; I may not know it.");
+    p("3. Explain in plain words what your ruleset will do in a match, including any trade-offs, and adjust it until I am happy.");
+    p("4. Then give me the complete ruleset as ONE JSON object in a single ```json code block, with \"mode\": \"shadow\" and a \"note\" in the form \"Name (by Author): one-sentence description\" (ask me for a name and how I want to be credited). Double-check it against every rule and limit above before you send it.");
+    p("5. Tell me to paste it into the checker at " + page + " which checks it and fills in the form so I can preview and send it. If I come back with error messages from the checker, fix exactly those and send the full corrected JSON again.");
+    p();
+    p("Now begin: greet me in one sentence and ask me what kind of item rules I would like.");
+    return L.join("\n");
+  }
 
   // ------------------------------------------------------------------ draft
 
@@ -1319,6 +1508,7 @@
 
   $("template").innerHTML = TEMPLATES.map(function (t, i) { return '<option value="' + i + '">' + esc(t.name) + "</option>"; }).join("");
   $("sec-ref").innerHTML = renderRef();
+  $("promptText").textContent = buildPrompt();
 
   var shared = /#r=([A-Za-z0-9_-]+)/.exec(location.hash);
   var loaded = false;
