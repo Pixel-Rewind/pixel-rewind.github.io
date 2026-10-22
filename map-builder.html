@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Map builder &mdash; Pixel Rewind Player</title>
+<meta name="description" content="Draw a map for online matches and send it to us.">
+<meta name="theme-color" content="#0b1322">
+<!-- Kept out of search engines by these tags alone. Do not add it to robots.txt: a crawler that may not
+     fetch the page never sees the noindex, and robots.txt would publish the address. -->
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet">
+<meta name="bingbot" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/map-builder.css">
+</head>
+<body>
+
+<!-- Not linked from anywhere on the site, on purpose: reached only by its direct link. -->
+
+<header class="topbar">
+  <div class="wrap topbar__in">
+    <a class="brand" href="index.html">
+      <img src="assets/img/favicon.svg" alt="" width="26" height="26">
+      Pixel Rewind
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="terms.html">Terms</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="report.html">Report a player</a>
+    </nav>
+  </div>
+</header>
+
+<main class="mapb">
+
+  <div class="pagehead">
+    <div class="wrap narrow">
+      <h1>Map builder</h1>
+      <p class="updated">Community tool &middot; online matches</p>
+    </div>
+  </div>
+
+  <section>
+    <div class="wrap narrow">
+      <p class="lede">Every online match is fought on a board. Draw your own here: who starts where, which ground each player owns, where the holes and the monsters are. Save it as a file and send it to us.</p>
+
+      <ol class="online-steps">
+        <li><strong>Start</strong> from a blank board, one of the examples below, or a map file you saved earlier.</li>
+        <li><strong>Draw.</strong> Pick a tool, then click or drag on the board. The list under the board tells you what still needs fixing.</li>
+        <li><strong>Send.</strong> Download the file and e-mail it to us. We try every map out before it is used in a real match.</li>
+      </ol>
+
+      <div class="callout">
+        <p><strong>Nothing leaves your browser until you send it.</strong> This page uploads nothing. Your drawing is kept on this device, so you can close the page and come back to it.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="start">
+    <div class="wrap">
+      <p class="label">1 &middot; Start</p>
+      <h2>What do you want to start from?</h2>
+      <div class="btn-row" id="startRow">
+        <button class="btn btn--primary" type="button" data-act="blank">Blank board</button>
+        <label class="btn" for="openFile">Open a map file&hellip;</label>
+        <input id="openFile" type="file" accept=".json,application/json" hidden>
+      </div>
+      <p class="hint">A map file is what this page downloads, or what we send you back. You can also drop one anywhere on this page.</p>
+      <div id="loadResult" role="status"></div>
+      <h3 class="subhead">Or take an example and change it</h3>
+      <div id="examples" class="examples"></div>
+    </div>
+  </section>
+
+  <section id="draw">
+    <div class="wrap">
+      <p class="label">2 &middot; Draw</p>
+      <h2>Your map</h2>
+
+      <div class="about">
+        <label class="field"><span>Name <em>(required)</em></span>
+          <input id="mapName" type="text" maxlength="32" placeholder="e.g. Crossroads" autocomplete="off"></label>
+        <label class="field"><span>Your name <em>(to be credited)</em></span>
+          <input id="mapAuthor" type="text" maxlength="60" placeholder="optional" autocomplete="off"></label>
+        <label class="field about__wide"><span>About it <em>(what is it like to play?)</em></span>
+          <input id="mapDesc" type="text" maxlength="300" placeholder="optional" autocomplete="off"></label>
+      </div>
+
+      <h4>Board for</h4>
+      <div class="tabs" id="boardTabs" role="tablist" aria-label="Number of players"></div>
+      <p class="hint">A match is played on the board for the number of players at the table, so a map needs a board for each size it should work for. You can make just one.</p>
+
+      <div id="boardEmpty" class="box" hidden></div>
+
+      <div id="boardArea" class="edit">
+        <div class="edit__main">
+          <div class="toolbar" id="toolbar"></div>
+          <div class="boardwrap" id="boardWrap"><canvas id="board" aria-label="The board. Click or drag to draw."></canvas></div>
+          <p class="hint" id="toolHint"></p>
+          <p class="status" id="boardMsg" role="status"></p>
+        </div>
+        <div class="edit__side" id="settings"></div>
+      </div>
+
+      <h4>Does it work?</h4>
+      <div id="checks"></div>
+    </div>
+  </section>
+
+  <section id="send">
+    <div class="wrap narrow">
+      <p class="label">3 &middot; Send</p>
+      <h2>Save it and send it to us</h2>
+      <div id="verdict"></div>
+      <div class="btn-row">
+        <button class="btn btn--primary" type="button" data-act="download" id="btnDownload">Download .json</button>
+        <button class="btn" type="button" data-act="email" id="btnEmail">Send it to us</button>
+        <button class="btn" type="button" data-act="copy" id="btnCopy">Copy the JSON</button>
+      </div>
+      <p class="status" id="status" role="status"></p>
+      <p class="hint">&ldquo;Send it to us&rdquo; downloads the file and opens your e-mail app, addressed to <a id="mailLink" href="#"></a>. Attach the file to the e-mail. You can open the same file here later to go on drawing.</p>
+      <details class="ref">
+        <summary>Look at the file</summary>
+        <div><pre class="json" id="jsonText"></pre></div>
+      </details>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap narrow ref">
+      <p class="label">Reference</p>
+      <h2>How a map plays</h2>
+      <details>
+        <summary>What the pieces are</summary>
+        <div>
+          <ul class="help">
+            <li><strong>Territory</strong> is the ground a player owns when the match starts. Walking over your own ground is faster than crossing anyone else's. Give everyone the same amount unless you mean it otherwise.</li>
+            <li><strong>Castle.</strong> Every player has one castle, 2&times;2 cells. A hero that dies comes back there. Win by bringing another player's princess home to your castle.</li>
+            <li><strong>Hero.</strong> Every player has exactly one start cell for their hero. It can be on their own castle or next to it, never on someone else's.</li>
+            <li><strong>Princess.</strong> She starts inside her castle. You can move her onto the board, or leave a castle empty.</li>
+            <li><strong>Monsters</strong> start next to the player you give them to and fight for them.</li>
+            <li><strong>Holes</strong> are cells nothing can stand on, be built on or be dropped on. Heroes walk around them.</li>
+          </ul>
+        </div>
+      </details>
+      <details>
+        <summary>Deathmatch and Princess Rush</summary>
+        <div>
+          <p class="help"><strong>Deathmatch:</strong> a board with <em>no castles</em>. Nobody respawns, a hero that dies is out, and the last one standing wins. There are no princesses on such a board. Switch to it under &ldquo;Board settings &rarr; Mode&rdquo;.</p>
+          <p class="help"><strong>Princess Rush:</strong> a room mode where every castle starts empty and one neutral princess waits somewhere on the board. Whoever brings her home first wins. Place her with the &ldquo;Neutral princess&rdquo; tool; without one she starts on the free cell nearest the middle. The other modes ignore her.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Limits, and what cannot be drawn</summary>
+        <div>
+          <p class="help">Each side is 6 to 32 cells (the game's own boards are 10 to 12; much bigger ones have not been tried in a real match). At most 32 monsters per board, one castle, hero and princess per player. Every piece needs a cell of its own and stays off holes; princesses and monsters stay off castles.</p>
+          <p class="help">Items are not part of a map: the game drops them during the match, and your <a href="item-rules-builder.html">item rules</a> decide where.</p>
+        </div>
+      </details>
+      <p class="hint credits">Sprites on the board: Super Retro World by Gif (<a href="https://twitter.com/gif_not_jif" rel="noopener noreferrer">@gif_not_jif</a>), Noiracide (@Noiracide) and Romi (@DessRomaric). They are stand-ins: the game draws its own. The four players' colours here only tell them apart; in a match every player keeps their own.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer__in">
+      <p>Pixel Rewind Player &mdash; a player for N-Gage-era games on Android and Linux.<br>
+         You bring the games; the app brings nothing but the machinery to run them.</p>
+      <nav class="footer__links" aria-label="Footer">
+        <a href="index.html">Home</a>
+        <a href="terms.html">Terms</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="report.html">Report a player</a>
+      </nav>
+    </div>
+    <p class="disclaimer">
+      Pixel Rewind Player is an independent project and is not affiliated with, endorsed by or connected to Nokia or any publisher of any game it can play. N-Gage and all game titles and trademarks belong to their respective owners.
+    </p>
+  </div>
+</footer>
+
+<script src="assets/js/map-builder-examples.js"></script>
+<script src="assets/js/map-builder.js"></script>
+</body>
+</html>

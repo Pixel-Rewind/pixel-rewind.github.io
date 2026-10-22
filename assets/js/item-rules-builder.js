@@ -73,7 +73,9 @@
     ["leaderHealth", false, "Standing", "Leader's health", "0 with no hero."],
     ["trailerHealth", false, "Standing", "Trailer's health", "0 with no hero."],
     ["equitySpread", false, "Item luck", "Item value gap", "Richest player's item value minus the poorest's.", 4],
-    ["needyDeficit", false, "Item luck", "Owed player is short by", "Richest player's item value minus the owed player's.", 4]
+    ["needyDeficit", false, "Item luck", "Owed player is short by", "Richest player's item value minus the owed player's.", 4],
+    ["engineDistLeaderHero", false, "The game's own spot", "Steps from the game's spot to the leader's hero", "Where the game would put this item before any rule moves it. As far as possible (width + height) with no leader's hero.", 6],
+    ["engineTooClose", false, "The game's own spot", "The game's spot is too close to a hero", "1 when the game's spot is nearer a hero than this rule's “keep away” steps, or within its “keep away” walking time of the fastest player (the leader alone, when the rule keeps away from the leader); else 0. Use it to move only the items that would land too close.", 7]
   ];
 
   // Factors a where rule scores cells by: [name, label, explanation, newer app, measured in]
@@ -95,15 +97,20 @@
     ["needyLeadOff", "Distance from the target lead", "How far the owed player's lead is from this rule's head start. 0 where the lead is exactly the one asked for.", 4, "travel"],
     ["contest", "Race closeness", "Second-fastest arrival minus the fastest. 0 is a dead heat.", 4, "travel"],
     ["reachNearest", "Fastest arrival", "The travel time of whoever gets there first.", 4, "travel"],
-    ["reachSpread", "Arrival spread", "Slowest player's travel time minus the fastest's. 0 where everyone gets there at the same time.", 5, "travel"]
+    ["reachSpread", "Arrival spread", "Slowest player's travel time minus the fastest's. 0 where everyone gets there at the same time.", 5, "travel"],
+    ["distEngineCell", "Steps from the game's spot", "Pulls the item towards where the game would have put it: 0 at the game's own spot, and 0 everywhere when that is not known (a Tube).", 6, "steps"],
+    ["leaderHeroShort", "Steps short of “keep away” from the leader's hero", "This rule's “keep away” steps less the steps to the leader's hero; 0 at that distance or further. Give it a large negative weight to stay out of the circle around the leader's hero.", 6, "steps"],
+    ["heroShort", "Steps short of “keep away” from a hero", "This rule's “keep away” steps less the steps to the nearest hero of anyone (or of the leader alone, when the rule keeps away from the leader); 0 at that distance or further. Give it a large negative weight to stay out of the circle around the hero.", 7, "steps"],
+    ["reachShort", "Walking time short of “keep away” time", "This rule's “keep away” walking time less how long the fastest player (or the leader alone) takes to walk there, 1000 = one turn; 0 at that time or more. A hero with a movement boost or a long chain of own blocks takes less time, so the item has to land further away.", 7, "travel"],
+    ["strongShort", "Steps short of the spacing between strong items", "Only with “Spread the strong items” on (section 5), and only for one of its strong items: the spacing less the steps to the nearest other strong item, on the board or landing later in the same drop; 0 at that distance or further, and 0 for every other item. Give it a large negative weight so a strong item this rule moves stays clear of the others.", 8, "steps"]
   ];
 
   var OPS = [["<", "<"], ["<=", "≤"], ["==", "="], ["!=", "≠"], [">=", "≥"], [">", ">"]];
   var EDIT_OPS = [["set", "Set weight of"], ["add", "Add to weight of"], ["scale", "Multiply weight of"]];
 
   var MAX_RULES = 32, MAX_CONDS = 8;
-  var L_VALUE = 1000000000, L_WEIGHT = 1000000, L_SCALE = 1000, L_ITEM_VALUE = 10000, L_CATCHUP = 100000, L_HEAD = 100000;
-  var TOP_FIELDS = ["mode", "note", "score", "baseWeights", "baseWeightsStart", "deal", "typeRules", "placeRules"];
+  var L_VALUE = 1000000000, L_WEIGHT = 1000000, L_SCALE = 1000, L_ITEM_VALUE = 10000, L_CATCHUP = 100000, L_HEAD = 100000, L_KEEP = 128, L_KEEP_TURNS = 100000;
+  var TOP_FIELDS = ["mode", "note", "score", "baseWeights", "baseWeightsStart", "deal", "draw", "typeRules", "placeRules"];
   var DRAFT_KEY = "pixelrewind.itemRulesDraft";
   var SEND_TO = "support@jubinganga.com";
 
@@ -126,6 +133,10 @@
     return { when: [["scoreSpread", ">=", 50], ["type", "==", item]], place: DEALT, headStart: 1000, stop: true };
   }
   var STRONG = ["BiggestFreakinGunPossible", "Bomb", "Teleport", "ComboBuilder", "MonsterTrainerBox"];
+  var KEEP_AWAY = { heroShort: -100000, reachShort: -10, distEngineCell: -1000, noise: 1 };
+  var KEEP_AWAY_SPREAD = { heroShort: -100000, strongShort: -20000, reachShort: -10, distEngineCell: -1000, noise: 1 };
+  // The spreading draw's defaults (the server's ItemRules.SpreadDefaultItems / SpreadDefaultApart)
+  var SPREAD_ITEMS = ["Teleport", "Bomb", "ComboBuilder"], SPREAD_APART = 4;
 
   var TEMPLATES = [
     { name: "Blank", text: "An empty ruleset: the game's own items, where the game puts them.", json: {} },
@@ -161,6 +172,68 @@
             { when: [["needyDeficit", ">=", 20]], place: DEALT, headStart: 250, stop: true },
             { place: { reachSpread: -10, reachNearest: -2, noise: 1 } }
           ])
+      }
+    },
+    {
+      name: "No Spoiling",
+      text: "The game's own items and spots, except that once someone is 50+ ahead, a Paintbrush, Teleport or Grenade the game would start within 3 steps of the leader's hero starts exactly 4 steps from it, as near the game's spot as that allows.",
+      json: {
+        score: STANDING,
+        placeRules: [{ when: [["scoreSpread", "<", 50]], stop: true }].concat(
+          ["ComboBuilder", "Teleport", "Bomb"].map(function (item) {
+            return {
+              when: [["type", "==", item], ["engineDistLeaderHero", "<=", 3]],
+              place: { leaderHeroShort: -100000, distEngineCell: -1000, noise: 1 }, keepAway: 4, stop: true
+            };
+          }))
+      }
+    },
+    {
+      name: "No Spoiling 2 (leader)",
+      text: "Like No Spoiling, but it starts at 20 ahead, covers the BFGP and Monster Box too, and the distance follows how far the leader can walk: at least 4 steps and a full turn of walking, so a Jetpack or a chain of their own blocks keeps strong items further away.",
+      json: {
+        score: STANDING,
+        placeRules: [{ when: [["scoreSpread", "<", 20]], stop: true }].concat(
+          STRONG.map(function (item) {
+            return {
+              when: [["type", "==", item], ["engineTooClose", "==", 1]],
+              place: KEEP_AWAY, keepAway: 4, keepAwayTurns: 1000, keepAwayFrom: "leader", stop: true
+            };
+          }))
+      }
+    },
+    {
+      name: "No Spoiling 2 (everyone)",
+      text: "Every item the game would start beside a hero is moved to the nearest cell at least 4 steps and a full turn of walking from every hero. Nobody finds an item to use at once; everything else stays where the game put it.",
+      json: {
+        placeRules: [{
+          when: [["engineTooClose", "==", 1]], place: KEEP_AWAY, keepAway: 4, keepAwayTurns: 1000, stop: true
+        }]
+      }
+    },
+    {
+      name: "No Spoiling 3 (leader)",
+      text: "No Spoiling 2 (leader) on top of the spreading: the game's own items and spots, with Paintbrushes, Grenades and Teleports spread so none lands within 4 steps of another, and a strong item moved away from the leader also kept clear of the others.",
+      json: {
+        draw: "spread",
+        score: STANDING,
+        placeRules: [{ when: [["scoreSpread", "<", 20]], stop: true }].concat(
+          STRONG.map(function (item) {
+            return {
+              when: [["type", "==", item], ["engineTooClose", "==", 1]],
+              place: KEEP_AWAY_SPREAD, keepAway: 4, keepAwayTurns: 1000, keepAwayFrom: "leader", stop: true
+            };
+          }))
+      }
+    },
+    {
+      name: "No Spoiling 3 (everyone)",
+      text: "No Spoiling 2 (everyone) on top of the spreading: the game's own items and spots, with Paintbrushes, Grenades and Teleports spread so none lands within 4 steps of another, and a strong item moved away from the heroes also kept clear of the others.",
+      json: {
+        draw: "spread",
+        placeRules: [{
+          when: [["engineTooClose", "==", 1]], place: KEEP_AWAY_SPREAD, keepAway: 4, keepAwayTurns: 1000, stop: true
+        }]
       }
     },
     {
@@ -260,16 +333,22 @@
       score: {},
       base: { kind: "match", mid: {}, start: {}, separateStart: false },
       deal: { enabled: false, values: values, catchUp: "", catchUpFrom: "" },
+      draw: { spread: false, items: spreadDefaults(), apart: String(SPREAD_APART) },
       typeRules: [],
       placeRules: []
     };
+  }
+  function spreadDefaults() {
+    var items = {};
+    SPREAD_ITEMS.forEach(function (k) { items[k] = true; });
+    return items;
   }
   var state = blankState();
   var ui = { closed: {}, preview: {}, previewOpening: false, showUntested: false };
 
   function newCond() { return { input: "round", item: "", op: ">=", value: "1" }; }
   function newTypeRule() { return { _id: nextId++, when: [], edits: [{ op: "scale", item: "Spring", value: "1" }], stop: false, note: "" }; }
-  function newPlaceRule() { return { _id: nextId++, when: [], outcome: "place", place: [{ feature: "distCenter", weight: "-1" }], headStart: "", stop: false, note: "" }; }
+  function newPlaceRule() { return { _id: nextId++, when: [], outcome: "place", place: [{ feature: "distCenter", weight: "-1" }], headStart: "", keepAway: "", keepAwayTurns: "", keepAwayFrom: "anyone", stop: false, note: "" }; }
 
   // ------------------------------------------------------------------ JSON <-> state
 
@@ -300,6 +379,14 @@
       o.deal = d;
     }
 
+    if (s.draw.spread) {
+      var strong = ITEMS.filter(function (it) { return it && s.draw.items[it[0]]; }).map(function (it) { return it[0]; });
+      var apart = num(s.draw.apart);
+      var plain = strong.length === SPREAD_ITEMS.length && SPREAD_ITEMS.every(function (k) { return s.draw.items[k]; }) &&
+        (apart === null || apart === SPREAD_APART);
+      o.draw = plain ? "spread" : { kind: "spread", items: strong, apart: apart === null ? SPREAD_APART : apart };
+    }
+
     if (s.typeRules.length) {
       o.typeRules = s.typeRules.map(function (r) {
         var out = {};
@@ -325,6 +412,10 @@
           out.place = p;
           var hs = num(r.headStart);
           if (hs !== null) out.headStart = hs;
+          var ka = num(r.keepAway), kt = num(r.keepAwayTurns);
+          if (ka !== null) out.keepAway = ka;
+          if (kt !== null) out.keepAwayTurns = kt;
+          if (r.keepAwayFrom === "leader") out.keepAwayFrom = "leader";
         }
         if (r.outcome === "suppress") out.suppress = true;
         if (r.stop) out.stop = true;
@@ -381,6 +472,15 @@
       s.deal.catchUp = o.deal.catchUp != null ? String(o.deal.catchUp) : "";
       s.deal.catchUpFrom = o.deal.catchUpFrom != null ? String(o.deal.catchUpFrom) : "";
     }
+    if (typeof o.draw === "string") s.draw.spread = lc(o.draw) === "spread";
+    else if (isObj(o.draw) && lc(o.draw.kind || "spread") === "spread") {
+      s.draw.spread = true;
+      if (Array.isArray(o.draw.items)) {
+        s.draw.items = {};
+        o.draw.items.forEach(function (k) { s.draw.items[itemKey(k)] = true; });
+      }
+      if (o.draw.apart != null) s.draw.apart = String(o.draw.apart);
+    }
     (o.typeRules || []).forEach(function (r) {
       var t = { _id: nextId++, when: (r.when || []).map(condIn), edits: [], stop: r.stop === true, note: typeof r.note === "string" ? r.note : "" };
       ["set", "add", "scale"].forEach(function (op) {
@@ -391,6 +491,8 @@
     (o.placeRules || []).forEach(function (r) {
       var p = {
         _id: nextId++, when: (r.when || []).map(condIn), place: [], headStart: r.headStart != null ? String(r.headStart) : "",
+        keepAway: r.keepAway != null ? String(r.keepAway) : "", keepAwayTurns: r.keepAwayTurns != null ? String(r.keepAwayTurns) : "",
+        keepAwayFrom: r.keepAwayFrom === "leader" ? "leader" : "anyone",
         outcome: r.suppress === true ? "suppress" : isObj(r.place) ? "place" : "keep", stop: r.stop === true,
         note: typeof r.note === "string" ? r.note : ""
       };
@@ -473,6 +575,36 @@
       });
     }
 
+    var spread = false;
+    if ("draw" in o) {
+      if (typeof o.draw === "string") {
+        if (!/^(game|spread)$/i.test(o.draw)) err("draw", "\"game\", \"spread\", or { \"kind\", \"items\", \"apart\" }");
+        spread = lc(o.draw) === "spread";
+      } else if (isObj(o.draw)) {
+        Object.keys(o.draw).forEach(function (k) {
+          if (["kind", "items", "apart", "note"].indexOf(k) < 0) err("draw." + k, "the spreading has kind, items and apart");
+        });
+        if ("kind" in o.draw && !(typeof o.draw.kind === "string" && /^(game|spread)$/i.test(o.draw.kind))) err("draw.kind", "\"game\" or \"spread\"");
+        spread = !("kind" in o.draw) || lc(o.draw.kind) === "spread";
+        if ("items" in o.draw) {
+          if (!Array.isArray(o.draw.items) || !o.draw.items.length) err("draw.items", "a list of the strong items");
+          else {
+            var seen = {};
+            o.draw.items.forEach(function (k) {
+              var i = itemIndex(k);
+              if (i < 0) err("draw.items", "not an item");
+              else if (!ITEMS[i][2]) err("draw.items", ITEMS[i][1] + " is left to the game: it cannot be a strong item");
+              else if (seen[i]) err("draw.items", ITEMS[i][1] + " is named twice");
+              seen[i] = true;
+            });
+          }
+        }
+        if ("apart" in o.draw) int(o.draw.apart, "draw.apart", 1, L_KEEP);
+      } else err("draw", "\"game\", \"spread\", or { \"kind\", \"items\", \"apart\" }");
+    }
+    if (!spread && (o.placeRules || []).some(function (r) { return isObj(r) && isObj(r.place) && "strongShort" in r.place; }))
+      err("placeRules", "the strong-item spacing factor only works with “Spread the strong items” on");
+
     rulesCheck("typeRules", false);
     rulesCheck("placeRules", true);
     return E;
@@ -489,7 +621,7 @@
       var list = o[name];
       if (!Array.isArray(list)) { err(name, "a list of rules"); return; }
       if (list.length > MAX_RULES) err(name, "at most " + MAX_RULES + " rules");
-      var allowed = place ? ["when", "place", "headStart", "suppress", "stop", "note"] : ["when", "set", "add", "scale", "stop", "note"];
+      var allowed = place ? ["when", "place", "headStart", "keepAway", "keepAwayTurns", "keepAwayFrom", "suppress", "stop", "note"] : ["when", "set", "add", "scale", "stop", "note"];
       list.forEach(function (r, i) {
         var path = name + "[" + i + "]";
         if (!isObj(r)) { err(path, "a rule is an object"); return; }
@@ -528,6 +660,18 @@
           int(r.headStart, path + ", head start", -L_HEAD, L_HEAD);
           if (!("place" in r)) err(path, "a head start only goes with a chosen spot");
         }
+        if (place && "keepAway" in r) {
+          int(r.keepAway, path + ", keep away", 0, L_KEEP);
+          if (!("place" in r)) err(path, "keep away only goes with a chosen spot");
+        }
+        if (place && "keepAwayTurns" in r) {
+          int(r.keepAwayTurns, path + ", keep away walking time", 0, L_KEEP_TURNS);
+          if (!("place" in r)) err(path, "keep away walking time only goes with a chosen spot");
+        }
+        if (place && "keepAwayFrom" in r) {
+          if (r.keepAwayFrom !== "anyone" && r.keepAwayFrom !== "leader") err(path, "keep away from is \"anyone\" or \"leader\"");
+          if (!("place" in r)) err(path, "keep away from only goes with a chosen spot");
+        }
         ["stop", "suppress"].forEach(function (k) {
           if (k in r && typeof r[k] !== "boolean") err(path, k + " is true or false");
         });
@@ -555,10 +699,11 @@
   function needsRecent(o) {
     var five = (o.score && o.score.monsters) || (o.placeRules || []).some(function (r) { return r.place && "reachSpread" in r.place; });
     if (five) return true;
-    var newInputs = ["equitySpread", "needyDeficit"];
+    var newInputs = INPUTS.filter(function (i) { return i[5]; }).map(function (i) { return i[0]; });
     var newFeatures = FEATURES.filter(function (f) { return f[3]; }).map(function (f) { return f[0]; });
-    return !!o.deal || (o.typeRules || []).concat(o.placeRules || []).some(function (r) {
-      return "headStart" in r ||
+    var spreading = typeof o.draw === "string" ? lc(o.draw) === "spread" : isObj(o.draw) && lc(o.draw.kind || "spread") === "spread";
+    return !!o.deal || spreading || (o.typeRules || []).concat(o.placeRules || []).some(function (r) {
+      return "headStart" in r || "keepAway" in r || "keepAwayTurns" in r || "keepAwayFrom" in r ||
         (r.when || []).some(function (c) { return newInputs.indexOf(c[0]) >= 0; }) ||
         (r.place && Object.keys(r.place).some(function (k) { return newFeatures.indexOf(k) >= 0; }));
     });
@@ -590,9 +735,9 @@
 
     var scoreUsed = SCORE.some(function (st) { var v = num(s.score[st[0]]); return typeof v === "number" && v !== 0; });
     var standingWords = ["scoreSpread", "leaderScore", "trailerScore"];
-    var standingFeatures = ["distLeaderHero", "distTrailerHero", "distLeaderCastle", "distTrailerCastle", "ownedByLeader", "ownedByTrailer"];
+    var standingFeatures = ["distLeaderHero", "distTrailerHero", "distLeaderCastle", "distTrailerCastle", "ownedByLeader", "ownedByTrailer", "leaderHeroShort"];
     var usesStanding = types.concat(places).some(function (r) {
-      return r.when.some(function (c) { return standingWords.indexOf(c.input) >= 0 || c.input === "leaderHealth" || c.input === "trailerHealth"; }) ||
+      return r.when.some(function (c) { return standingWords.indexOf(c.input) >= 0 || c.input === "leaderHealth" || c.input === "trailerHealth" || c.input === "engineDistLeaderHero"; }) ||
         (r.place && r.outcome === "place" && r.place.some(function (f) { return standingFeatures.indexOf(f.feature) >= 0; }));
     });
     if (usesStanding && !scoreUsed) warn("Your rules ask about the leader or trailer, but every standing weight is 0. Everyone then stands at 0, the lead is always 0, and player 1 always counts as the leader.");
@@ -663,6 +808,15 @@
         var hasLeadOff = r.place.some(function (f) { return f.feature === "needyLeadOff"; });
         if (r.headStart !== "" && !hasLeadOff) warn(label + " has a head start but no “distance from the target lead” factor; the head start only changes that factor.");
         if (r.headStart === "" && hasLeadOff) info(label + " uses “distance from the target lead” with no head start, so the target is an even race (0).");
+        var hasStepsShort = r.place.some(function (f) { return f.feature === "leaderHeroShort" || f.feature === "heroShort"; });
+        var hasTimeShort = r.place.some(function (f) { return f.feature === "reachShort"; });
+        if (hasStepsShort && r.keepAway === "") warn(label + " scores “steps short of keep away” but has no keep away steps, so that factor is always 0.");
+        if (r.keepAway !== "" && !hasStepsShort) warn(label + " has keep away steps but no “steps short of keep away” factor; keep away only changes those factors" + (r.when.some(function (c) { return c.input === "engineTooClose"; }) ? " and the “too close” condition" : "") + ".");
+        if (hasTimeShort && r.keepAwayTurns === "") warn(label + " scores “walking time short of keep away” but has no keep away walking time, so that factor is always 0.");
+        if (r.keepAwayTurns !== "" && !hasTimeShort && !r.when.some(function (c) { return c.input === "engineTooClose"; })) warn(label + " has a keep away walking time but no “walking time short” factor or “too close” condition to use it.");
+      }
+      if (r.when.some(function (c) { return c.input === "engineTooClose"; }) && r.keepAway === "" && r.keepAwayTurns === "") {
+        warn(label + " asks whether the game's spot is too close, but has no keep away steps or walking time, so it is never too close.");
       }
       if (r.outcome === "keep" && !r.stop) info(label + " neither chooses a spot, drops nothing nor stops, so it does nothing.");
     });
@@ -762,7 +916,10 @@
         var w = Number(p.weight) || 0;
         return (w < 0 ? "−" : "+") + Math.abs(w) + " × " + find(FEATURES, p.feature)[1].toLowerCase();
       });
-      what = "best cell by " + (f.length ? esc(f.join(", ")) : "nothing") + (r.headStart !== "" ? esc(", head start " + r.headStart) : "");
+      what = "best cell by " + (f.length ? esc(f.join(", ")) : "nothing") + (r.headStart !== "" ? esc(", head start " + r.headStart) : "") +
+        (r.keepAway !== "" ? esc(", keep away " + r.keepAway + " step" + (Number(r.keepAway) === 1 ? "" : "s")) : "") +
+        (r.keepAwayTurns !== "" ? esc(", keep away " + r.keepAwayTurns + " of walking") : "") +
+        ((r.keepAway !== "" || r.keepAwayTurns !== "") && r.keepAwayFrom === "leader" ? esc(" from the leader") : "");
     }
     return esc(whenText(r.when)) + ": " + what + (r.stop ? ". <em>Then stop.</em>" : ".");
   }
@@ -824,6 +981,20 @@
       '<span class="hint">In percent. 100 means a player 100 points behind the leader is owed until their item value is 1.5× an even player\'s, 150 behind until 2×.</span></div>' +
       '<div><b>Starting from a lead of</b>' + numIn("deal.catchUpFrom", d.catchUpFrom, 0, L_VALUE, 1, "Catch-up from", ' placeholder="0"') +
       '<span class="hint">Standing points. Below this gap, everyone is owed the same.</span></div></div>';
+    return html;
+  }
+
+  function renderDraw() {
+    var d = state.draw;
+    var html = '<label class="check"><input type="checkbox" data-path="draw.spread" data-rerender' + (d.spread ? " checked" : "") +
+      '><span><b>Spread the strong items</b> <span class="tag tag--new">recent apps</span></span></label>';
+    if (!d.spread) return html;
+    html += "<h4>Strong items</h4><div class=\"numgrid\">" + ITEMS.filter(function (it) { return it && it[2] && (it[3] || ui.showUntested); }).map(function (it) {
+      return '<label class="check"><input type="checkbox" data-path="draw.items.' + it[0] + '"' + (d.items[it[0]] ? " checked" : "") + "><span>" + esc(it[1]) + "</span></label>";
+    }).join("") + "</div>";
+    html += "<h4>Keep them apart by</h4>" +
+      '<div class="numgrid"><div><b>Steps</b>' + numIn("draw.apart", d.apart, 1, L_KEEP, 1, "Steps apart", ' placeholder="' + SPREAD_APART + '"') +
+      '<span class="hint">Steps across or down, not diagonal. The boards are 10 to 16 cells a side.</span></div></div>';
     return html;
   }
 
@@ -913,7 +1084,14 @@
         body += '<button class="tool" type="button" data-act="add-feat" data-i="' + i + '">+ Factor</button>';
         body += '<div class="row" style="margin-top:10px"><span class="unit">Head start</span>' + numIn(p + ".headStart", r.headStart, -L_HEAD, L_HEAD, 1, "Head start", ' placeholder="none"') +
           '<span class="unit">thousandths of a turn <span class="tag tag--new">recent apps</span></span></div>' +
-          '<p class="hint">Only for “distance from the target lead”: 0 is an even race, 250 a step ahead, 1000 a full turn ahead. See the reference below.</p>';
+          '<p class="hint">Only for “distance from the target lead”: 0 is an even race, 250 a step ahead, 1000 a full turn ahead. See the reference below.</p>' +
+          '<div class="row" style="margin-top:10px"><span class="unit">Keep away</span>' + numIn(p + ".keepAway", r.keepAway, 0, L_KEEP, 1, "Keep away steps", ' placeholder="none"') +
+          '<span class="unit">steps from a hero <span class="tag tag--new">recent apps</span></span></div>' +
+          '<div class="row"><span class="unit">Keep away</span>' + numIn(p + ".keepAwayTurns", r.keepAwayTurns, 0, L_KEEP_TURNS, 1, "Keep away walking time", ' placeholder="none"') +
+          '<span class="unit">thousandths of a turn of walking <span class="tag tag--new">recent apps</span></span></div>' +
+          '<div class="row"><span class="unit">Keep away from</span>' + sel(p + ".keepAwayFrom", [["anyone", "every hero"], ["leader", "the leader's hero only"]], r.keepAwayFrom, ' aria-label="Keep away from"') +
+          '<span class="unit"><span class="tag tag--new">recent apps</span></span></div>' +
+          '<p class="hint">Only for the “short of keep away” factors and the “too close” condition. Steps count cells, so a hero who walks far in a turn is not kept further away. Walking time does: 2000 means the item lands where even the fastest hero needs two turns to get there.</p>';
       }
       return ruleShell("placeRules", r, i, n, body, placeSummary(r));
     }).join("") + "</div>";
@@ -990,7 +1168,7 @@
       : '<ul class="issues"><li class="info"><b>OK</b>No problems found.</li></ul>';
     return '<span class="compat ' + (recent ? "compat--recent" : "compat--all") + '">' +
       (recent ? "Needs a recent app" : "Works with every app that has item rules") + "</span>" +
-      (recent ? '<p class="hint">It uses the fair deal, a head start, monsters or arrival times. In a match where a player still has an older app, nobody plays with item rules.</p>' : "") +
+      (recent ? '<p class="hint">It uses the fair deal, the spreading, a head start, monsters, arrival times or a keep-away. In a match where a player still has an older app, nobody plays with item rules.</p>' : "") +
       list +
       '<pre class="json" id="jsonOut">' + esc(json) + "</pre>" +
       '<div class="btn-row">' +
@@ -1051,6 +1229,7 @@
     $("sec-score").innerHTML = renderScore();
     $("sec-base").innerHTML = renderBase();
     $("sec-deal").innerHTML = renderDeal();
+    $("sec-draw").innerHTML = renderDraw();
     $("sec-type").innerHTML = renderType();
     $("sec-place").innerHTML = renderPlace();
     refresh();
@@ -1381,11 +1560,12 @@
     p("  \"baseWeights\": \"match\" | { item: weight, ... },   the weights a type rule starts from");
     p("  \"baseWeightsStart\": { item: weight, ... },   only beside an object baseWeights: separate weights for the opening spread");
     p("  \"deal\": { \"values\": { item: value, ... }, \"catchUp\": n, \"catchUpFrom\": n },   the fair deal (see THE FAIR DEAL)");
+    p("  \"draw\": \"game\" | \"spread\" | { \"kind\": \"spread\", \"items\": [item, ...], \"apart\": n },   spreading the strong items (see SPREADING)");
     p("  \"typeRules\": [ rule, ... ],");
     p("  \"placeRules\": [ rule, ... ]");
     p("}");
     p("A type rule has only: \"when\", \"set\", \"add\", \"scale\", \"stop\", \"note\".");
-    p("A place rule has only: \"when\", \"place\", \"headStart\", \"suppress\", \"stop\", \"note\".");
+    p("A place rule has only: \"when\", \"place\", \"headStart\", \"keepAway\", \"keepAwayTurns\", \"keepAwayFrom\", \"suppress\", \"stop\", \"note\".");
     p("Strict JSON only: double quotes, no comments, no trailing commas, whole numbers unless stated.");
     p();
     p("# Conditions (\"when\")");
@@ -1425,6 +1605,7 @@
     p("2. With a \"place\", every free cell gets a score = sum of (weight x factor value at that cell), weights -1000000..1000000. The item starts at the highest-scoring cell (ties: the top-most, then left-most). A NEGATIVE weight on a distance means closer is better, positive means further. The weights are priorities: \"distTrailerHero\": -1000, \"distLeaderHero\": 400 means being one step nearer the trailer always beats being two steps further from the leader.");
     p("3. Without any place, the game's random cell stays.");
     p("\"headStart\" (-100000..100000, default 0) belongs to a rule with \"place\" and only affects the factor needyLeadOff (see THE FAIR DEAL). [RECENT]");
+    p("\"keepAway\" (0..128 steps), \"keepAwayTurns\" (0..100000 thousandths of a turn) and \"keepAwayFrom\" (\"anyone\", the default, or \"leader\") belong to a rule with \"place\" and only affect the factors heroShort and reachShort (leaderHeroShort uses keepAway too) and the input engineTooClose (see KEEPING ITEMS AWAY FROM HEROES). [RECENT]");
     p();
     p("## Place factors");
     FEATURES.forEach(function (f) {
@@ -1448,8 +1629,24 @@
     p("- Dealing an item: place {\"needyLeadOff\": -10, \"needyReach\": -2, \"noise\": 1} with headStart 0 = an even race between the owed player and their nearest rival; 250 = slightly their side (one own-block step); 1000 = a full turn their side; 100000 = at their feet.");
     p("- Fair ground (nobody favoured): place {\"reachSpread\": -10, \"reachNearest\": -2, \"noise\": 1}.");
     p();
+    p("# Keeping items away from heroes [RECENT]");
+    p("The game picks a random cell for every item, so about half of all items start within 3 steps of some hero and one in eight right beside one. To keep items from landing next to heroes without otherwise changing where they go:");
+    p("- The input \"engineTooClose\" is 1 when the game's own cell is nearer a hero than this rule's \"keepAway\" steps, or less than \"keepAwayTurns\" of walking from the fastest player. Use it in \"when\" so only those items are moved.");
+    p("- The factor \"heroShort\" is \"keepAway\" minus the steps to the nearest hero of anyone (with \"keepAwayFrom\": \"leader\", the leader's hero only), or 0 at that distance or further. The factor \"reachShort\" is \"keepAwayTurns\" minus the fastest player's travel time (the leader's with \"keepAwayFrom\": \"leader\"), or 0. A big NEGATIVE weight on them keeps the item out of the circle. (\"leaderHeroShort\" is the older leader-only version of heroShort, in steps.)");
+    p("- \"distEngineCell\" (steps from the game's own cell) at a negative weight brings the item back as near as possible to where the game would have put it.");
+    p("- \"keepAwayTurns\" is what makes the distance depend on how far a hero can walk: a hero with a movement boost, or a long chain of its own blocks, needs the item further away in steps for the same walking time. \"keepAway\" is then the minimum in steps.");
+    p("Example, every item at least 4 steps and at least 2 turns of walking from every hero:");
+    p(compact({ mode: "shadow", score: STANDING, placeRules: [
+      { when: [["engineTooClose", "==", 1]], place: { heroShort: -100000, reachShort: -10, distEngineCell: -1000, noise: 1 }, keepAway: 4, keepAwayTurns: 2000, stop: true }
+    ] }));
+    p();
+    p("# Spreading the strong items (\"draw\") [RECENT]");
+    p("The game drops several items at once. With \"draw\": \"spread\", each drop keeps exactly the game's items and the game's spots, but the strong items (default Paintbrush, Grenade and Teleport: \"ComboBuilder\", \"Bomb\", \"Teleport\") swap places with other items of the same drop so that none lands within \"apart\" steps (default 4, 1..128) of another strong item, on the board or in the same drop. Nothing is added or removed. If there is no clear spot, the item stays where the game put it.");
+    p("- The which-item rules then see the spread item as \"type\" (\"engineType\" is still the game's own roll), and the where rules work on top. A where rule that moves a strong item can bring it next to another one again: give it the factor \"strongShort\" (the spacing less the steps to the nearest other strong item, 0 for items that are not strong) at a big negative weight, e.g. -20000.");
+    p("- \"strongShort\" is only allowed with the spreading on.");
+    p();
     p("# Compatibility");
-    p("Anything marked [RECENT] (the deal, headStart, the inputs equitySpread and needyDeficit, the factors needyReach, needyLead, needyLeadOff, contest, reachNearest, reachSpread, and a non-zero monsters weight) needs a recent version of the app. In a match where any player has an older app, the ruleset is not used at all. Mention this to me when you use them.");
+    p("Anything marked [RECENT] (the deal, headStart, keepAway, keepAwayTurns, keepAwayFrom, the inputs equitySpread, needyDeficit, engineDistLeaderHero and engineTooClose, the factors needyReach, needyLead, needyLeadOff, contest, reachNearest, reachSpread, distEngineCell, leaderHeroShort, heroShort, reachShort and strongShort, the spreading draw, and a non-zero monsters weight) needs a recent version of the app. In a match where any player has an older app, the ruleset is not used at all. Mention this to me when you use them.");
     p();
     p("# Limits");
     p("At most 32 type rules and 32 place rules, at most 8 conditions per rule.");
@@ -1498,6 +1695,7 @@
       var d = JSON.parse(localStorage.getItem(DRAFT_KEY) || "null");
       if (d && d.raw && d.raw.base && Array.isArray(d.raw.typeRules)) {
         d.raw.typeRules.concat(d.raw.placeRules).forEach(function (r) { r._id = nextId++; });
+        if (!isObj(d.raw.draw)) d.raw.draw = blankState().draw; /* a draft from before the spreading */
         return d.raw;
       }
     } catch (err) { /* nothing usable */ }

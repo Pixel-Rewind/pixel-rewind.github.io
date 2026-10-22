@@ -139,7 +139,16 @@
 
   <section>
     <div class="wrap narrow">
-      <p class="label">5 &middot; Which item</p>
+      <p class="label">5 &middot; Spreading</p>
+      <h2>Spread the strong items</h2>
+      <p class="help">The game drops several items at once, each in a random spot, so two strong items can land side by side. With this on, every drop keeps <strong>exactly the game's items and the game's spots</strong>, but the strong items swap spots with the other items of the same drop so that none lands within the chosen steps of another strong item (on the board, or in the same drop). Nothing is added or taken away; a strong item with no clear spot stays where the game put it. The rules below then work on top.</p>
+      <div id="sec-draw"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap narrow">
+      <p class="label">6 &middot; Which item</p>
       <h2>Which-item rules</h2>
       <p class="help">Checked from top to bottom for every item the game is about to drop. <strong>Every rule whose conditions all hold</strong> changes the weights. The changes add up, unless a rule says to stop. If at least one rule held, the item is drawn again from the resulting weights. If none held, the game's own item stays.</p>
       <ul class="hint">
@@ -154,7 +163,7 @@
 
   <section>
     <div class="wrap narrow">
-      <p class="label">6 &middot; Preview</p>
+      <p class="label">7 &middot; Preview</p>
       <h2>What it does to the item mix</h2>
       <p class="help">Tick the which-item rules that hold at some moment in a match to see the share of each item while they do. This uses the standard online weights.</p>
       <div id="sec-preview"></div>
@@ -163,7 +172,7 @@
 
   <section>
     <div class="wrap narrow">
-      <p class="label">7 &middot; Where</p>
+      <p class="label">8 &middot; Where</p>
       <h2>Where rules</h2>
       <p class="help">Checked from top to bottom for every item about to drop, the Tube included. A rule whose conditions all hold can choose the spot, or drop nothing. If several rules choose a spot, <strong>the last one wins</strong>. Once a rule says &ldquo;drop nothing&rdquo;, nothing drops. If no rule chooses a spot, the game's random spot stays.</p>
       <p class="help">To choose a spot, every free cell is <strong>scored</strong>: each factor's value at that cell, times its weight, added up. The item starts at the highest-scoring cell. A <strong>negative</strong> weight on a distance means <em>closer is better</em>; a positive one, <em>further</em>. The weights also set priorities: &minus;1000 per step towards one hero beats +400 per step away from another.</p>
@@ -173,7 +182,7 @@
 
   <section>
     <div class="wrap narrow">
-      <p class="label">8 &middot; Check and send</p>
+      <p class="label">9 &middot; Check and send</p>
       <h2>Your ruleset</h2>
       <div id="sec-out"></div>
     </div>
@@ -185,7 +194,7 @@
       <h2>Every condition, factor and item</h2>
       <div id="sec-ref"></div>
       <details>
-        <summary>Travel time and the head start</summary>
+        <summary>Travel time, the head start and keep away</summary>
         <div>
           <p class="help">Some factors measure <strong>travel time</strong>: how long a player's hero takes to walk to a cell, using the game's movement costs. 1000 is one full turn. With the standard rules, one step costs:</p>
           <table>
@@ -205,6 +214,12 @@
             <tr><td>100000</td><td>at their feet</td></tr>
           </table>
           <p class="help" style="margin-top:12px">Leads come in whole steps, so the item lands on the nearest lead the board allows. On open neutral ground a step is 666.</p>
+          <p class="help"><strong>Keep away</strong> keeps items from landing next to a hero. A where rule has two settings: <em>steps</em> (cells from a hero) and <em>walking time</em> (the fastest player's travel time, 1000 per turn). Pair them with the factors &ldquo;steps short of keep away&rdquo; and &ldquo;walking time short of keep away&rdquo; at large negative weights, and use the condition &ldquo;the game's spot is too close to a hero&rdquo; so only the items that would land too close are moved. A little weight on &ldquo;steps from the game's spot&rdquo; keeps each item as near as possible to where the game would have put it.</p>
+          <table>
+            <tr><th>Keep away</th><th>With standard movement costs</th></tr>
+            <tr><td>4 steps</td><td>at least 4 cells from every hero; across neutral ground a hero needs nearly 3 turns to get there, but only 1 turn across their own blocks</td></tr>
+            <tr><td>2000 of walking</td><td>wherever every hero needs at least two turns, so the further a hero can walk in a turn (boosts, long chains of own blocks), the further away the item lands</td></tr>
+          </table>
         </div>
       </details>
       <details>
@@ -225,7 +240,7 @@
       <details>
         <summary>Limits</summary>
         <div>
-          <p class="help">Up to 32 which-item rules and 32 where rules, 8 conditions per rule. Weights &plusmn;1&nbsp;000&nbsp;000, multipliers 0 to 1000 (up to three decimals), item values 0 to 10&nbsp;000, head start &plusmn;100&nbsp;000. Condition values are whole numbers.</p>
+          <p class="help">Up to 32 which-item rules and 32 where rules, 8 conditions per rule. Weights &plusmn;1&nbsp;000&nbsp;000, multipliers 0 to 1000 (up to three decimals), item values 0 to 10&nbsp;000, head start &plusmn;100&nbsp;000, keep away 0 to 128 steps and 0 to 100&nbsp;000 of walking time. Condition values are whole numbers.</p>
         </div>
       </details>
     </div>

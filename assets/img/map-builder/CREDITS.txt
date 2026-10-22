@@ -1,0 +1,23 @@
+Map editor sprites
+
+These are not Pixel Rewind art. They are crops from two purchased packs of the Super Retro World
+collection, used under its licence (commercial use allowed; the assets may not be redistributed or
+sold on their own). Credit to the authors:
+
+    Gif       (@gif_not_jif)
+    Noiracide (@Noiracide)
+    Romi      (@DessRomaric)
+
+file                 pack                                  source file         crop (x, y, w, h)
+castle.png           SuperRetroWorld_InteriorPack_Full     atlas_16x.png       440, 48, 32, 40
+floor.png            SuperRetroWorld_InteriorPack_Full     atlas_16x.png         0, 96, 16, 16
+territory-1.png      SuperRetroWorld_InteriorPack_Full     atlas_16x.png        64,144, 16, 16
+territory-2.png      SuperRetroWorld_InteriorPack_Full     atlas_16x.png        16,144, 16, 16
+territory-3.png      SuperRetroWorld_InteriorPack_Full     atlas_16x.png        32,144, 16, 16
+territory-4.png      SuperRetroWorld_InteriorPack_Full     atlas_16x.png        48,144, 16, 16
+hero-1.png           SuperRetroWorld_CharacterPack_Full    character_1-8.png    64, 80, 16, 20
+hero-2.png           SuperRetroWorld_CharacterPack_Full    character_1-8.png    16,  0, 16, 20
+hero-3.png           SuperRetroWorld_CharacterPack_Full    character_1-8.png   112, 80, 16, 20
+hero-4.png           SuperRetroWorld_CharacterPack_Full    character_1-8.png   160, 80, 16, 20
+princess.png         SuperRetroWorld_CharacterPack_Full    character_1-8.png    16, 80, 16, 20
+monster.png          SuperRetroWorld_CharacterPack_Full    character_17-24.png 160, 80, 16, 20
