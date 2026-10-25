@@ -1,0 +1,67 @@
+/* The replay page (watch.html) only. Builds on map-builder.css (buttons, fields, hints, reference boxes);
+   the script (assets/js/replay-player.js) writes the class names below. */
+
+.watch .status.is-error { color: var(--pink); }
+.watch .have { color: var(--muted); }
+.watch .have.is-ready { color: var(--green); }
+.watch #import-controls .btn-row { margin-top: 6px; }
+.watch #licence-row { margin-top: 14px; }
+
+.watch .check { display: flex; gap: 9px; align-items: flex-start; cursor: pointer; margin: 8px 0; }
+.watch .check input { margin-top: 5px; width: 17px; height: 17px; flex: none; accent-color: var(--mauve-text); }
+
+.watch .finder { margin: 8px 0 18px; }
+.watch .finder__row { display: flex; gap: 8px; align-items: center; max-width: 460px; }
+.watch .finder__row input { flex: 1; }
+
+.watch .matches { display: grid; gap: 14px; margin: 14px 4px 10px; }
+.watch .match {
+  --fill: var(--panel);
+  --edge: var(--cream);
+  --px: 3px;
+  --sh: 1px;
+  display: flex; gap: 14px; align-items: center; justify-content: space-between;
+  padding: 10px 14px;
+  background-color: var(--fill);
+  border: var(--px) solid var(--line);
+  border-image: var(--frame) 3 / 2 / 2 stretch;
+  box-shadow:
+    var(--sh) var(--sh) 0 var(--sh) var(--edge),
+    calc(var(--sh) * -1) calc(var(--sh) * -1) 0 var(--sh) var(--fill);
+}
+.watch .match:hover { --fill: var(--panel-2); }
+.watch .match__text { min-width: 0; }
+.watch .match__who { font-size: 17px; line-height: 1.4; overflow-wrap: anywhere; }
+.watch .match__hero { color: var(--muted); font-size: 15px; text-transform: capitalize; }
+.watch .match__name.is-hit { color: var(--mauve-text); font-weight: 700; }
+.watch .match__what { margin-top: 2px; color: var(--muted); font-size: 15px; line-height: 1.45; overflow-wrap: anywhere; }
+.watch .match .btn { flex: none; }
+
+.watch #match-id { width: 9em; }
+
+/* ------------------------------------------------------------ the player */
+
+.watch #stage { display: none; flex-direction: column; align-items: center; padding-top: 30px; }
+.watch #stage .wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.watch .replay-title { max-width: 100%; text-align: center; }
+.watch .replay-title .match__who { font-size: 18px; }
+.watch #screen-wrap { position: relative; max-width: 100%; }
+.watch #screen { display: block; max-width: 100%; height: auto; image-rendering: pixelated; image-rendering: crisp-edges; background: #000; border: 4px solid var(--line); box-shadow: 4px 4px 0 var(--mauve); touch-action: manipulation; }
+.watch #cover { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.55); }
+.watch #replay-start { width: 84px; height: 84px; display: flex; align-items: center; justify-content: center; padding: 0; border: 4px solid var(--cream); background: var(--mauve); color: var(--on-accent); cursor: pointer; box-shadow: 4px 4px 0 var(--cream); }
+.watch #replay-start:hover:not(:disabled) { background: var(--mauve-2); }
+.watch #replay-start svg { width: 34px; height: 34px; margin-left: 5px; fill: currentColor; }
+.watch #saving { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 16px; background: rgba(0, 0, 0, 0.86); color: #fff; }
+.watch #saving h2 { margin: 0; font-size: 22px; }
+.watch #saving progress { width: min(320px, 100%); height: 10px; accent-color: var(--mauve); }
+.watch #save-progress { font: 13px var(--mono); text-align: center; }
+.watch #save-note { max-width: 360px; color: #c8c8cc; font-size: 13px; text-align: center; }
+.watch #save-note:empty { display: none; }
+.watch #cover[hidden], .watch #saving[hidden] { display: none; }
+
+.watch #replay-bar { display: none; flex-direction: column; gap: 10px; width: 100%; max-width: 640px; }
+.watch #seek { width: 100%; accent-color: var(--mauve); }
+.watch .bar-row { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: center; }
+.watch .bar-row .check { margin: 0; font-size: 16px; }
+.watch #clock { min-width: 9em; font: 13px var(--mono); text-align: center; }
+.watch #stats { font: 12px var(--mono); }

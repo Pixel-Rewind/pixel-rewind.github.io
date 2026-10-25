@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Watch a match again &mdash; Pixel Rewind Player</title>
+<meta name="description" content="Watch an online match again in your browser, played by the game itself.">
+<meta name="theme-color" content="#121016">
+<!-- Kept out of search engines by these tags alone. Do not add it to robots.txt: a crawler that may not
+     fetch the page never sees the noindex, and robots.txt would publish the address. -->
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet">
+<meta name="bingbot" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/map-builder.css">
+<link rel="stylesheet" href="assets/css/watch.css">
+</head>
+<body>
+
+<!-- Not linked from anywhere on the site, on purpose: reached only by its direct link.
+     The engine under public/player/ and assets/js/replay-player.js are copied in by the
+     replay-sync script of the new site (website/scripts/copy-replay-to-old-site.sh); do not edit them here. -->
+
+<header class="topbar">
+  <div class="wrap topbar__in">
+    <a class="brand" href="index.html">
+      <img src="assets/img/favicon.svg" alt="" width="26" height="26">
+      Pixel Rewind
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="terms.html">Terms</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="report.html">Report a player</a>
+    </nav>
+  </div>
+</header>
+
+<main class="mapb watch">
+
+  <div class="pagehead">
+    <div class="wrap narrow">
+      <h1>Watch a match again</h1>
+      <p class="updated">Replays &middot; played in your browser</p>
+    </div>
+  </div>
+
+  <section>
+    <div class="wrap narrow">
+      <p class="lede">Every online match is recorded. Pick one below, or look up a player, and the game plays it back for you: the same board, the same voices, the same moves.</p>
+      <div class="callout">
+        <p><strong>Nothing is uploaded.</strong> The game runs inside this page. You give it your own copy of the game once; it stays in this browser&rsquo;s storage and never leaves your device. We ship no game files. The page asks our server for the list of matches, and for the match you open, and nothing else.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="setup">
+    <div class="wrap narrow">
+      <p class="label">1 &middot; Your copy of the game</p>
+      <h2>Bring the game</h2>
+      <p class="help" id="have-line"><span id="have" class="have">Loading the player&hellip;</span></p>
+      <div id="import-controls" hidden>
+        <div class="btn-row">
+          <label class="btn" for="pick-folder">Choose the PC version&rsquo;s folder&hellip;</label>
+          <input id="pick-folder" type="file" webkitdirectory multiple hidden>
+          <label class="btn" for="pick-file">Choose a .n-gage file&hellip;</label>
+          <input id="pick-file" type="file" accept=".n-gage,.sis,.sisx" hidden>
+          <button class="btn btn--small btn--danger" type="button" id="forget" disabled>Remove it from this browser</button>
+        </div>
+        <label class="check" id="licence-row" hidden>
+          <input type="checkbox" id="licence">
+          <span>I own the full N-Gage game (not the trial)</span>
+        </label>
+      </div>
+      <p class="status" id="status" role="status"></p>
+      <p class="hint">The PC version&rsquo;s folder is the one that holds <code>ResetGeneration-Win32-Web.dll</code>. Your browser will ask to let this page read the files in it; it only reads them. Either version plays every match.</p>
+    </div>
+  </section>
+
+  <section id="watch">
+    <div class="wrap narrow">
+      <p class="label">2 &middot; Pick a match</p>
+      <h2>Recent matches</h2>
+
+      <form id="player-form" class="finder" role="search" autocomplete="off">
+        <label class="field" for="player-filter">
+          <span>Only the matches of a player <em>(any part of the name, capital letters do not matter)</em></span>
+        </label>
+        <div class="finder__row">
+          <input id="player-filter" type="text" maxlength="32" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="e.g. kpj97">
+          <button class="btn btn--small" type="button" id="player-clear" hidden>Clear</button>
+        </div>
+      </form>
+
+      <p class="status" id="list-status" role="status"></p>
+      <div id="matches" class="matches"></div>
+      <div class="btn-row">
+        <button class="btn" type="button" id="older" hidden>Older matches</button>
+      </div>
+
+      <h4>Or open one directly</h4>
+      <div class="btn-row">
+        <input id="match-id" type="number" min="1" placeholder="Match number" aria-label="Match number">
+        <button class="btn btn--primary" type="button" id="watch-id">Watch</button>
+        <label class="btn btn--small" for="pick-replay">Open a replay file&hellip;</label>
+        <input id="pick-replay" type="file" accept=".json,application/json" hidden>
+      </div>
+      <p class="hint">The match number is the <code>#</code> in the list. Names are the online names players had in the match. See <a href="privacy.html">the privacy policy</a> for how matches are kept.</p>
+    </div>
+  </section>
+
+  <section id="stage">
+    <div class="wrap">
+      <div id="replay-title" class="replay-title"></div>
+      <div id="screen-wrap">
+        <canvas id="screen" aria-label="The match" role="img"></canvas>
+        <div id="cover" hidden>
+          <button id="replay-start" type="button" aria-label="Play the match">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>
+          </button>
+        </div>
+        <div id="saving" hidden role="status">
+          <h2>Making the video</h2>
+          <progress id="save-bar" max="1" value="0"></progress>
+          <div id="save-progress">Starting&hellip;</div>
+          <div id="save-note"></div>
+          <button class="btn btn--small" type="button" id="replay-save-cancel">Cancel</button>
+        </div>
+      </div>
+      <div id="replay-bar">
+        <input type="range" id="seek" min="0" value="0" step="1" aria-label="Time in the match">
+        <div class="bar-row">
+          <button class="btn btn--primary btn--small" type="button" id="replay-play" aria-label="Play">Play</button>
+          <span id="clock">0:00 / 0:00</span>
+          <label class="check"><input type="checkbox" id="replay-skip" checked><span>Skip idle time</span></label>
+          <label class="check"><input type="checkbox" id="replay-voice"><span>Wait for the announcer</span></label>
+          <label class="check"><input type="checkbox" id="replay-fast"><span>2&times;</span></label>
+        </div>
+        <div class="bar-row">
+          <button class="btn btn--small" type="button" id="replay-save">Save as video</button>
+          <button class="btn btn--small" type="button" id="replay-back">Back to matches</button>
+          <span id="save-status" class="hint"></span>
+        </div>
+      </div>
+      <div id="stats" class="hint"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap narrow ref">
+      <p class="label">Reference</p>
+      <h2>Good to know</h2>
+      <details>
+        <summary>What can I watch?</summary>
+        <div>
+          <p class="help">Online matches recorded since the server started keeping match recordings. Matches played with computer players, and Princess Rush matches, may not replay exactly; the list still shows them.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Skip idle time, the announcer, 2&times;</summary>
+        <div>
+          <p class="help"><strong>Skip idle time</strong> (on) jumps over the waits between moves while the board is still. <strong>Wait for the announcer</strong> (off) makes each phase wait until the announcer has finished speaking, as the original did. <strong>2&times;</strong> plays at double speed. You can drag the time bar to any point of the match.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Save as video</summary>
+        <div>
+          <p class="help">The page can render the match to an MP4 file, in your browser, as fast as your device manages (a few times faster than the match itself in Chrome). Chrome and Edge are quickest; Firefox makes VP9 video, which takes several times the match&rsquo;s length. Nothing is uploaded.</p>
+        </div>
+      </details>
+      <details>
+        <summary>It does not work in my browser</summary>
+        <div>
+          <p class="help">Use a current Chrome, Edge, Firefox or Safari on a computer or a recent phone. The page needs WebAssembly and, for sound, AudioWorklet. Importing the PC version&rsquo;s folder needs a browser that can pick a folder (everything but some phone browsers; on those, import a <code>.n-gage</code> file instead). Private windows may refuse to keep the game in storage: you would import it again every visit.</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+</main>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer__in">
+      <p>Pixel Rewind Player &mdash; a player for N-Gage-era games on Android and Linux.<br>
+         You bring the games; the app brings nothing but the machinery to run them.</p>
+      <nav class="footer__links" aria-label="Footer">
+        <a href="index.html">Home</a>
+        <a href="terms.html">Terms</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="report.html">Report a player</a>
+      </nav>
+    </div>
+    <p class="disclaimer">
+      Pixel Rewind Player is an independent project and is not affiliated with, endorsed by or connected to Nokia or any publisher of any game it can play. N-Gage and all game titles and trademarks belong to their respective owners.
+    </p>
+  </div>
+</footer>
+
+<script src="public/player/config.js"></script>
+<script src="public/player/player.js"></script>
+<script src="assets/js/replay-player.js"></script>
+</body>
+</html>
