@@ -7,4 +7,4 @@
    window.REPLAY_API = 'https://replays.example.com';
 
    This file belongs to the website; publish-web-to-site.sh never overwrites it. */
-window.REPLAY_API = 'http://142.93.202.137:5050';   // temporary: plain http, so it only works on http or localhost pages
+window.REPLAY_API = 'https://server.pixelrewind.app';
